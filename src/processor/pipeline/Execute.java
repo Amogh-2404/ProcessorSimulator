@@ -20,18 +20,23 @@ public class Execute {
 	
 	public void performEX()
 	{
-		//TODO
-		if(OF_EX_Latch.isEX_enable()){
-			compute();
+		if (OF_EX_Latch.isEX_enable()) {
+			Instruction inst = OF_EX_Latch.getInstruction(); // Getting the instruction
+			EX_MA_Latch.setInstruction(inst); // Passing instruction as control signals to pipeline
+
+			if (inst != null) { // If instruction is not a null (or nop) instruction
+				compute(inst); // executing the instruction
+
+				// Performing Control-Interlock validation for branch instructions
+				containingProcessor.getControlInterlockUnit().validate();
+			}
 
 			OF_EX_Latch.setEX_enable(false);
 			EX_MA_Latch.setMA_enable(true);
 		}
 	}
 
-	private void compute(){
-		Instruction inst = OF_EX_Latch.getInstruction();
-		EX_MA_Latch.setInstruction(inst); //TODO:- Implement in EX_MA
+	private void compute(Instruction inst){
 
 		long op1 = OF_EX_Latch.getOperand1();
 		long op2 = OF_EX_Latch.getOperand2();

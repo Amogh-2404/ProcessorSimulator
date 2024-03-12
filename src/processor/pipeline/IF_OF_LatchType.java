@@ -4,10 +4,13 @@ public class IF_OF_LatchType {
 	
 	boolean OF_enable;
 	int instruction ,currentPC;
+
+	boolean isNop, isStall;
 	
 	public IF_OF_LatchType()
 	{
 		OF_enable = false;
+		isNop = false;
 	}
 
 	public boolean isOF_enable() {
@@ -29,4 +32,21 @@ public class IF_OF_LatchType {
 	public int getCurrentPC(){return currentPC;}
 
 	public void setCurrentPC(int currPC){ currentPC = currPC;}
+
+	public void setNop(boolean isNop) {
+		this.isNop = isNop;
+	}
+
+	public boolean getNop() {
+		return this.isNop;
+	}
+
+	public void setStall(boolean isStall) {
+		this.isStall = isStall;
+	}
+
+	public boolean getStall() {
+		return this.isStall;
+	}
+
 }

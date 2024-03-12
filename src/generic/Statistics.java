@@ -7,6 +7,10 @@ public class Statistics {
 
 	static int numberOfInstructions;
 	static int numberOfCycles;
+
+	static int numberOfDataHazards;
+
+	static int numberOfNop;
 	
 
 	public static void printStatistics(String statFile)
@@ -17,7 +21,13 @@ public class Statistics {
 			
 			writer.println("Number of instructions executed = " + numberOfInstructions);
 			writer.println("Number of cycles taken = " + numberOfCycles);
-			
+			writer.println(
+					"Number of times an instruction on a wrong branch path entered the pipeline = "
+							+ numberOfNop);
+			writer.println(
+					"Number of times the OF stage needed to stall because of a data hazard = "
+							+ numberOfDataHazards);
+
 			writer.close();
 		}
 		catch(Exception e)
@@ -32,5 +42,13 @@ public class Statistics {
 
 	public static void setNumberOfCycles(int numberOfCycles) {
 		Statistics.numberOfCycles = numberOfCycles;
+	}
+
+	public static void setNumberOfDataHazards(int numberOfDataHazards) {
+		Statistics.numberOfDataHazards = numberOfDataHazards;
+	}
+
+	public static void setNumberOfNop(int numberOfNop) {
+		Statistics.numberOfNop = numberOfNop;
 	}
 }

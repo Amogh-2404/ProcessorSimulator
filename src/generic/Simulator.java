@@ -9,6 +9,11 @@ public class Simulator {
 		
 	static Processor processor;
 	static boolean simulationComplete;
+
+	static int numInst; // Number of instructions executed
+	static int numDataHazards; // Number of times the OF stage needed to stall because of a data
+								// hazard
+	static int numNop; // Number of times an instruction on a wrong branch path entered the pipeline
 	
 	public static void setupSimulation(String assemblyProgramFile, Processor p)
 	{
@@ -16,6 +21,8 @@ public class Simulator {
 		loadProgram(assemblyProgramFile);
 		
 		simulationComplete = false;
+
+		numInst = numDataHazards = numNop = 0; // Initializing them to all 0's
 	}
 	
 	static void loadProgram(String assemblyProgramFile)
@@ -59,6 +66,7 @@ public class Simulator {
 			Misc.printErrorAndExit(e.toString());
 		}
 
+
 		Simulator.processor.getRegisterFile().setValue(0,0);
 		Simulator.processor.getRegisterFile().setValue(1,65535);
 		Simulator.processor.getRegisterFile().setValue(2,65535);
@@ -71,25 +79,38 @@ public class Simulator {
 //		System.out.println(processor.getMainMemory().getContentsAsString(65530, 65535));
 		while(simulationComplete==false)
 		{
-			processor.getIFUnit().performIF();
-			processor.getOFUnit().performOF();
-			processor.getEXUnit().performEX();
-			processor.getMAUnit().performMA();
 			processor.getRWUnit().performRW();
+			processor.getMAUnit().performMA();
+			processor.getEXUnit().performEX();
+			processor.getOFUnit().performOF();
+			processor.getIFUnit().performIF();
 			Clock.incrementClock();
 
-			++numberOfInstructions;
 		}
 		
 
 		// set statistics
 		Statistics.setNumberOfCycles((int)Clock.getCurrentTime());
-		Statistics.setNumberOfInstructions(numberOfInstructions);
+		Statistics.setNumberOfInstructions(numInst);
+		Statistics.setNumberOfDataHazards(numDataHazards);
+		Statistics.setNumberOfNop(numNop);
 //		System.out.println(processor.getMainMemory().getContentsAsString(65530, 65535));
 	}
 	
 	public static void setSimulationComplete(boolean value)
 	{
 		simulationComplete = value;
+	}
+
+	public static void incNumInst(){
+		++numInst;
+	}
+
+	public static void incNumDataHazards(){
+		++numDataHazards;
+	}
+
+	public static void incNop(){
+		++numNop;
 	}
 }

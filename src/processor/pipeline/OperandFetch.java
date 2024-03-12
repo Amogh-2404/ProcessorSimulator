@@ -3,6 +3,7 @@ package processor.pipeline;
 import generic.Instruction;
 import generic.Misc;
 import generic.Operand;
+import generic.Simulator;
 import processor.Processor;
 import generic.Instruction.OperationType;
 import generic.Operand.OperandType;
@@ -20,10 +21,28 @@ public class OperandFetch {
 	
 	public void performOF()
 	{
-		if(IF_OF_Latch.isOF_enable())
-		{
+		if (IF_OF_Latch.isOF_enable()) {
 
-			decode();
+			if (IF_OF_Latch.getNop()) { // If the instruction is nop instruction
+				// Passing null (nop) as instruction ahead in pipeline
+				OF_EX_Latch.setInstruction(null);
+				Simulator.incNop(); // Incrementing number of nop instructions
+
+			} else {
+				// Checking if current instruction is having some conflict with instructions in EX
+				// and MA stages
+				containingProcessor.getDataInterlockUnit().checkConflict();
+
+				if (IF_OF_Latch.getStall()) { // If OF stage is set to stall
+					OF_EX_Latch.setInstruction(null); // Passing null (nop) ahead in pipeline
+					Simulator.incNumDataHazards(); // Incrementing number of data hazards occured
+
+				} else {
+					decode(); // Decoding the instruction
+
+				}
+			}
+
 			IF_OF_Latch.setOF_enable(false);
 			OF_EX_Latch.setEX_enable(true);
 		}

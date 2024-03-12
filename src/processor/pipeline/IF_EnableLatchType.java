@@ -3,7 +3,7 @@ package processor.pipeline;
 public class IF_EnableLatchType {
 	
 	boolean IF_enable;
-	
+	boolean isStall; // whether IF stage is stalling or not
 	public IF_EnableLatchType()
 	{
 		IF_enable = true;
@@ -16,5 +16,14 @@ public class IF_EnableLatchType {
 	public void setIF_enable(boolean iF_enable) {
 		IF_enable = iF_enable;
 	}
+
+	public void setStall(boolean isStall) {
+		this.isStall = isStall;
+	}
+
+	public boolean getStall() {
+		return this.isStall;
+	}
+
 
 }

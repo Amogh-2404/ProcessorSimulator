@@ -1,5 +1,7 @@
 package processor;
 
+import processor.interlocks.ControlInterlock;
+import processor.interlocks.DataInterlock;
 import processor.memorysystem.MainMemory;
 import processor.pipeline.EX_IF_LatchType;
 import processor.pipeline.EX_MA_LatchType;
@@ -31,6 +33,9 @@ public class Processor {
 	Execute EXUnit;
 	MemoryAccess MAUnit;
 	RegisterWrite RWUnit;
+
+	DataInterlock DataInterlockUnit; // The Data-Interlock unit of the processor
+	ControlInterlock ControlInterlockUnit; // The Control-Interlock unit of the processor
 	
 	public Processor()
 	{
@@ -49,6 +54,10 @@ public class Processor {
 		EXUnit = new Execute(this, OF_EX_Latch, EX_MA_Latch, EX_IF_Latch);
 		MAUnit = new MemoryAccess(this, EX_MA_Latch, MA_RW_Latch);
 		RWUnit = new RegisterWrite(this, MA_RW_Latch, IF_EnableLatch);
+
+		DataInterlockUnit =
+				new DataInterlock(this, IF_EnableLatch, IF_OF_Latch, EX_MA_Latch, MA_RW_Latch);
+		ControlInterlockUnit = new ControlInterlock(IF_OF_Latch, EX_IF_Latch);
 	}
 	
 	public void printState(int memoryStartingAddress, int memoryEndingAddress)
@@ -94,4 +103,19 @@ public class Processor {
 		return RWUnit;
 	}
 
+	public DataInterlock getDataInterlockUnit() {
+		return DataInterlockUnit;
+	}
+
+	public void setDataInterlockUnit(DataInterlock dataInterlockUnit) {
+		DataInterlockUnit = dataInterlockUnit;
+	}
+
+	public ControlInterlock getControlInterlockUnit() {
+		return ControlInterlockUnit;
+	}
+
+	public void setControlInterlockUnit(ControlInterlock controlInterlockUnit) {
+		ControlInterlockUnit = controlInterlockUnit;
+	}
 }
