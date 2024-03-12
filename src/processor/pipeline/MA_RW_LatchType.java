@@ -12,6 +12,7 @@ public class MA_RW_LatchType {
 	public MA_RW_LatchType()
 	{
 		RW_enable = false;
+		excess = 0;
 	}
 
 	public boolean isRW_enable() {

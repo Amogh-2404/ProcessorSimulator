@@ -8,7 +8,8 @@ public class InstructionFetch {
 	IF_EnableLatchType IF_EnableLatch;
 	IF_OF_LatchType IF_OF_Latch;
 	EX_IF_LatchType EX_IF_Latch;
-	
+
+	boolean firstInstruction = true;
 	public InstructionFetch(Processor containingProcessor, IF_EnableLatchType iF_EnableLatch, IF_OF_LatchType iF_OF_Latch, EX_IF_LatchType eX_IF_Latch)
 	{
 		this.containingProcessor = containingProcessor;
@@ -23,12 +24,13 @@ public class InstructionFetch {
 		{
 			if(EX_IF_Latch.getIsBranchTaken()){
 				containingProcessor.getRegisterFile().setProgramCounter(EX_IF_Latch.getBranchPC());
+
 			}
 			int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
 			int newInstruction = containingProcessor.getMainMemory().getWord(currentPC);
 			IF_OF_Latch.setInstruction(newInstruction);
 			containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
-			
+			IF_OF_Latch.setCurrentPC(currentPC);
 			IF_EnableLatch.setIF_enable(false);
 			IF_OF_Latch.setOF_enable(true);
 		}

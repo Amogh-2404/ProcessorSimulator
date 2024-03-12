@@ -4,7 +4,8 @@ import generic.Instruction;
 import generic.Misc;
 import generic.Operand;
 import processor.Processor;
-
+import generic.Instruction.OperationType;
+import generic.Operand.OperandType;
 public class OperandFetch {
 	Processor containingProcessor;
 	IF_OF_LatchType IF_OF_Latch;
@@ -38,7 +39,7 @@ public class OperandFetch {
 
 		// Setting operation type using opcode
 		newIns.setOperationType(
-				Instruction.OperationType.values()[binaryToDecimal(inst.substring(0, 5), false)]);
+				OperationType.values()[binaryToDecimal(inst.substring(0, 5), false)]);
 
 		// Performing above mentioned operations based on the operation type of Instruction
 		switch (newIns.getOperationType()) {
@@ -206,7 +207,7 @@ public class OperandFetch {
 	// string
 	private Operand getRegisterOperand(String val) {
 		Operand operand = new Operand(); // Making a new operand
-		operand.setOperandType(Operand.OperandType.Register); // setting operand type as Register
+		operand.setOperandType(OperandType.Register); // setting operand type as Register
 		operand.setValue(binaryToDecimal(val, false)); // setting its value
 		return operand;
 	}
@@ -215,7 +216,7 @@ public class OperandFetch {
 	// binary string
 	private Operand getImmediateOperand(String val) {
 		Operand operand = new Operand(); // Making a new operand
-		operand.setOperandType(Operand.OperandType.Immediate); // setting operand type as Register
+		operand.setOperandType(OperandType.Immediate); // setting operand type as Register
 		operand.setValue(binaryToDecimal(val, true)); // setting its value
 		return operand;
 	}

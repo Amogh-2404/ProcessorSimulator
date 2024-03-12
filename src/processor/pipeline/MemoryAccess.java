@@ -73,6 +73,7 @@ public class MemoryAccess {
 				case xori:
 				case slti:
 				case slli:
+				case srli:
 				case srai:
 				case beq:
 				case bne:
