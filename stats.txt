@@ -1,4 +1,4 @@
-Number of instructions executed = 96
-Number of cycles taken = 120
-Number of times an instruction on a wrong branch path entered the pipeline = 16
-Number of times the OF stage needed to stall because of a data hazard = 24
+Number of instructions executed = 10
+Number of cycles taken = 16
+Number of times an instruction on a wrong branch path entered the pipeline = 0
+Number of times the OF stage needed to stall because of a data hazard = 6

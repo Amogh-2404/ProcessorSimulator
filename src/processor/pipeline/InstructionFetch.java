@@ -39,6 +39,8 @@ public class InstructionFetch {
 
 				IF_OF_Latch.setCurrentPC(currentPC); // passing the current pc ahead in pipeline
 
+				
+
 				containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
 				Simulator.incNumInst(); // Incrementing the Number of instructions fetched

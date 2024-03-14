@@ -166,6 +166,8 @@ public class OperandFetch {
 			}
 
 			case end:
+				//Simulator.setSimulationComplete(true);
+				containingProcessor.getRegisterFile().setProgramCounter(IF_OF_Latch.getCurrentPC());
 				break;
 
 			default:
