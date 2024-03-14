@@ -43,8 +43,10 @@ public class InstructionFetch {
 
 				containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
-				Simulator.incNumInst(); // Incrementing the Number of instructions fetched
+				 // Incrementing the Number of instructions fetched
+//				Simulator.incNumInst();
 			}
+
 			// As IF stage will always be enabled to fetch instructions
 			// IF_EnableLatch.setIF_enable(false);
 
