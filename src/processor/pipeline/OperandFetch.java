@@ -26,6 +26,7 @@ public class OperandFetch {
 			if (IF_OF_Latch.isNop()) {
 				OF_EX_Latch.setInstruction(null);
 				Simulator.incrementNop();
+				InstructionFetch.additionalNop = !InstructionFetch.additionalNop;
 			} else {
 
 				containingProcessor.getDataInterlockUnit().checkConflict();

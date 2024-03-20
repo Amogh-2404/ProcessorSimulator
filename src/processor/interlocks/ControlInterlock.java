@@ -7,7 +7,7 @@ public class ControlInterlock {
     EX_IF_LatchType EX_IF_Latch;
     public void validate() {
         if (EX_IF_Latch.getIsBranchTaken()) {
-            IF_OF_Latch.setNop(true); // Setting Nop to True indicating an invalid instruction
+            IF_OF_Latch.setNop(true);
         }
     }
     public ControlInterlock(IF_OF_LatchType iF_OF_Latch, EX_IF_LatchType eX_IF_Latch) {

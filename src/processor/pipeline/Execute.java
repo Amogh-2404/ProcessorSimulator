@@ -27,7 +27,6 @@ public class Execute {
 			if (inst != null) {
 				compute(inst);
 
-
 				containingProcessor.getControlInterlockUnit().validate();
 			}
 			// TODO:- DEBUG

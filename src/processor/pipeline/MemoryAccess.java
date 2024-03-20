@@ -9,11 +9,11 @@ public class MemoryAccess {
 	EX_MA_LatchType EX_MA_Latch;
 	MA_RW_LatchType MA_RW_Latch;
 	
-	public MemoryAccess(Processor containingProcessor, EX_MA_LatchType eX_MA_Latch, MA_RW_LatchType mA_RW_Latch)
+	public MemoryAccess(Processor containingProcessor, EX_MA_LatchType EX_MA_Latch, MA_RW_LatchType MA_RW_Latch)
 	{
 		this.containingProcessor = containingProcessor;
-		this.EX_MA_Latch = eX_MA_Latch;
-		this.MA_RW_Latch = mA_RW_Latch;
+		this.EX_MA_Latch = EX_MA_Latch;
+		this.MA_RW_Latch = MA_RW_Latch;
 	}
 
 	public void performMA() {
@@ -24,25 +24,19 @@ public class MemoryAccess {
 			if (inst != null) {
 				int aluResult = EX_MA_Latch.getAluResult();
 				int operand = EX_MA_Latch.getOperand();
-				// instruction
 				int excess = EX_MA_Latch.getExcess();
 				MA_RW_Latch.setExcess(excess);
 
 
 				switch (inst.getOperationType()) {
 					case load: {
-						// Alu Result will be address from which we have to load in case of load
-						// instruction
+
 						int ldResult = containingProcessor.getMainMemory().getWord(aluResult);
-						MA_RW_Latch.setLdResult(ldResult); // Passing the ldResult to store it to
-						// register to Register Writeback stage
+						MA_RW_Latch.setLdResult(ldResult);
 						break;
 					}
 
 					case store: {
-						// Alu Result will be address where we need to store in case of store
-						// instruction
-						// Setting operand value at that address
 						containingProcessor.getMainMemory().setWord(aluResult, operand);
 						break;
 					}
