@@ -6,15 +6,6 @@ public class EX_IF_LatchType {
 	boolean isBranchTaken;
 
 	int branchPC;
-	
-	public EX_IF_LatchType()
-	{
-		isBranchTaken = false;
-	}
-
-	public boolean getIsBranchTaken(){return isBranchTaken;}
-
-	public void setIsBranchTaken(boolean isBranchTaken){this.isBranchTaken=isBranchTaken;}
 
 	public void setIsBranch_enable(boolean isBranchTaken, int pC)
 	{
@@ -25,6 +16,19 @@ public class EX_IF_LatchType {
 	public int getBranchPC(){return branchPC;}
 
 	public void setBranchPC(int branchPC){this.branchPC = branchPC;}
+
+	public boolean getIsBranchTaken(){return isBranchTaken;}
+	
+	public EX_IF_LatchType()
+	{
+		isBranchTaken = false;
+	}
+
+
+
+	public void setIsBranchTaken(boolean isBranchTaken){this.isBranchTaken=isBranchTaken;}
+
+
 
 
 }

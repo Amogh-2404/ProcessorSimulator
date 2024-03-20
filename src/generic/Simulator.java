@@ -94,7 +94,7 @@ public class Simulator {
 		Statistics.setNumberOfInstructions(numInst);
 		Statistics.setNumberOfDataHazards(numDataHazards);
 		Statistics.setNumberOfNop(numNop);
-//		System.out.println(processor.getMainMemory().getContentsAsString(65530, 65535));
+
 	}
 	
 	public static void setSimulationComplete(boolean value)
@@ -110,7 +110,7 @@ public class Simulator {
 		++numDataHazards;
 	}
 
-	public static void incNop(){
+	public static void incrementNop(){
 		++numNop;
 	}
 }

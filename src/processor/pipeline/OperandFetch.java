@@ -23,22 +23,19 @@ public class OperandFetch {
 	{
 		if (IF_OF_Latch.isOF_enable()) {
 
-			if (IF_OF_Latch.getNop()) { // If the instruction is nop instruction
-				// Passing null (nop) as instruction ahead in pipeline
+			if (IF_OF_Latch.isNop()) {
 				OF_EX_Latch.setInstruction(null);
-				Simulator.incNop(); // Incrementing number of nop instructions
-
+				Simulator.incrementNop();
 			} else {
-				// Checking if current instruction is having some conflict with instructions in EX
-				// and MA stages
+
 				containingProcessor.getDataInterlockUnit().checkConflict();
 
-				if (IF_OF_Latch.getStall()) { // If OF stage is set to stall
-					OF_EX_Latch.setInstruction(null); // Passing null (nop) ahead in pipeline
-					Simulator.incNumDataHazards(); // Incrementing number of data hazards occured
+				if (IF_OF_Latch.getStall()) {
+					OF_EX_Latch.setInstruction(null);
+					Simulator.incNumDataHazards();
 
 				} else {
-					decode(); // Decoding the instruction
+					decodeTheInstruction();
 
 				}
 			}
@@ -48,21 +45,123 @@ public class OperandFetch {
 		}
 	}
 
+	private int convertBinaryToDecimal(String binaryString, boolean isSigned) {
+		if (!isSigned) {
+			return Integer.parseInt(binaryString, 2);
+		} else {
+			String copyString = '0' + binaryString.substring(1);
+			int ans = Integer.parseInt(copyString, 2);
+			if (binaryString.length() == 32) {
+				if (binaryString.charAt(0) == '1') {
 
-	private void decode(){
-		// Getting the 32 bit binary string representation of given instruction
-		String inst = padStart(Integer.toBinaryString(IF_OF_Latch.getInstruction()), 32);
+					int power = (1 << 30);
+					ans -= power;
+					ans -= power;
+				}
+			} else {
+				if (binaryString.charAt(0) == '1') {
 
-		Instruction newIns = new Instruction(); // Making an object of Instruction class
-		newIns.setProgramCounter(IF_OF_Latch.getCurrentPC()); // setting the current program counter
+					int power = (1 << (binaryString.length() - 1));
+					ans -= power;
+				}
+			}
 
-		// Setting operation type using opcode
+			return ans;
+		}
+	}
+
+	private Operand getRegisterOperand(String val) {
+		Operand operand = new Operand();
+		operand.setOperandType(OperandType.Register);
+		operand.setValue(convertBinaryToDecimal(val, false));
+		return operand;
+	}
+
+	private void decodeTheInstruction(){
+
+		String inst = addPaddingToStart(Integer.toBinaryString(IF_OF_Latch.getInstruction()), 32);
+
+		Instruction newIns = new Instruction();
+		newIns.setProgramCounter(IF_OF_Latch.getCurrentPC());
+
+
 		newIns.setOperationType(
-				OperationType.values()[binaryToDecimal(inst.substring(0, 5), false)]);
+				OperationType.values()[convertBinaryToDecimal(inst.substring(0, 5), false)]);
 
-		// Performing above mentioned operations based on the operation type of Instruction
 		switch (newIns.getOperationType()) {
-			// R3I type
+			case addi:
+			case subi:
+			case muli:
+			case divi:
+			case andi:
+			case ori:
+			case xori:
+			case slti:
+			case slli:
+			case srli:
+			case srai:
+			case load:
+			case store: {
+
+				newIns.setSourceOperand1(getRegisterOperand(inst.substring(5, 10)));
+
+				newIns.setDestinationOperand(getRegisterOperand(inst.substring(10, 15)));
+
+				newIns.setSourceOperand2(getImmediateOperand(inst.substring(15, 32)));
+
+
+				OF_EX_Latch.setOperand1(containingProcessor.getRegisterFile()
+						.getValue(newIns.getSourceOperand1().getValue()));
+
+				OF_EX_Latch.setOperand2(containingProcessor.getRegisterFile()
+						.getValue(newIns.getDestinationOperand().getValue()));
+
+				OF_EX_Latch.setImmediate(newIns.getSourceOperand2().getValue());
+
+				OF_EX_Latch.setIsImmediate(true);
+				break;
+			}
+
+
+			case beq:
+			case bne:
+			case blt:
+			case bgt: {
+
+				newIns.setSourceOperand1(getRegisterOperand(inst.substring(5, 10)));
+
+				newIns.setSourceOperand2(getRegisterOperand(inst.substring(10, 15)));
+
+				newIns.setDestinationOperand(getImmediateOperand(inst.substring(15, 32)));
+
+
+				OF_EX_Latch.setOperand1(containingProcessor.getRegisterFile()
+						.getValue(newIns.getSourceOperand1().getValue()));
+
+				OF_EX_Latch.setOperand2(containingProcessor.getRegisterFile()
+						.getValue(newIns.getSourceOperand2().getValue()));
+
+				OF_EX_Latch.setBranchTarget(
+						IF_OF_Latch.getCurrentPC() + newIns.getDestinationOperand().getValue());
+				break;
+			}
+
+
+			case jmp: {
+				if (convertBinaryToDecimal(inst.substring(5, 10), false) != 0) { // if rd is used
+
+					newIns.setDestinationOperand(getRegisterOperand(inst.substring(5, 10)));
+				} else {
+
+					newIns.setDestinationOperand(getImmediateOperand(inst.substring(10, 32)));
+				}
+
+
+				OF_EX_Latch.setBranchTarget(
+						IF_OF_Latch.getCurrentPC() + newIns.getDestinationOperand().getValue());
+				break;
+			}
+
 			case add:
 			case sub:
 			case mul:
@@ -92,81 +191,7 @@ public class OperandFetch {
 				break;
 			}
 
-			// R2I type
-			case addi:
-			case subi:
-			case muli:
-			case divi:
-			case andi:
-			case ori:
-			case xori:
-			case slti:
-			case slli:
-			case srli:
-			case srai:
-			case load:
-			case store: {
-				// rs1
-				newIns.setSourceOperand1(getRegisterOperand(inst.substring(5, 10)));
-				// rd
-				newIns.setDestinationOperand(getRegisterOperand(inst.substring(10, 15)));
-				// imm
-				newIns.setSourceOperand2(getImmediateOperand(inst.substring(15, 32)));
-
-				// operand1
-				OF_EX_Latch.setOperand1(containingProcessor.getRegisterFile()
-						.getValue(newIns.getSourceOperand1().getValue()));
-				// operand2
-				OF_EX_Latch.setOperand2(containingProcessor.getRegisterFile()
-						.getValue(newIns.getDestinationOperand().getValue()));
-				// immediate
-				OF_EX_Latch.setImmediate(newIns.getSourceOperand2().getValue());
-				// isImmediate control signal
-				OF_EX_Latch.setIsImmediate(true);
-				break;
-			}
-
-			case beq:
-			case bne:
-			case blt:
-			case bgt: {
-				// rs1
-				newIns.setSourceOperand1(getRegisterOperand(inst.substring(5, 10)));
-				// rd
-				newIns.setSourceOperand2(getRegisterOperand(inst.substring(10, 15)));
-				// imm
-				newIns.setDestinationOperand(getImmediateOperand(inst.substring(15, 32)));
-
-				// operand1
-				OF_EX_Latch.setOperand1(containingProcessor.getRegisterFile()
-						.getValue(newIns.getSourceOperand1().getValue()));
-				// operand2
-				OF_EX_Latch.setOperand2(containingProcessor.getRegisterFile()
-						.getValue(newIns.getSourceOperand2().getValue()));
-				// branchTarget
-				OF_EX_Latch.setBranchTarget(
-						IF_OF_Latch.getCurrentPC() + newIns.getDestinationOperand().getValue());
-				break;
-			}
-
-			// RI type :
-			case jmp: {
-				if (binaryToDecimal(inst.substring(5, 10), false) != 0) { // if rd is used
-					// rd
-					newIns.setDestinationOperand(getRegisterOperand(inst.substring(5, 10)));
-				} else { // else imm is used
-					// imm
-					newIns.setDestinationOperand(getImmediateOperand(inst.substring(10, 32)));
-				}
-
-				// branchTarget
-				OF_EX_Latch.setBranchTarget(
-						IF_OF_Latch.getCurrentPC() + newIns.getDestinationOperand().getValue());
-				break;
-			}
-
 			case end:
-				//Simulator.setSimulationComplete(true);
 				containingProcessor.getRegisterFile().setProgramCounter(IF_OF_Latch.getCurrentPC());
 				break;
 
@@ -174,71 +199,30 @@ public class OperandFetch {
 				Misc.printErrorAndExit("Unknown Instruction!!");
 		}
 
-		// Passing instruction as control signals to pipeline
+
 		OF_EX_Latch.setInstruction(newIns);
 	}
 
-	// Function to pad a given a string from starting by 0's and making it of given total length
-	private String padStart(String str, int totalLength) {
-		if (str.length() >= totalLength) { // If it is already greater or equal to total length
+
+	private String addPaddingToStart(String str, int totalLength) {
+		if (str.length() >= totalLength) {
 			return str;
 		}
 		int count = 0;
 		String ans = "";
-		while (count < totalLength - str.length()) { // Adding the required number of zeros
+		while (count < totalLength - str.length()) {
 			ans += '0';
 			++count;
 		}
-		ans += str; // Adding the given string
+		ans += str;
 		return ans;
 	}
 
-	// Function to convert given binary string to decimal based on signed representation or not
-	private int binaryToDecimal(String binaryString, boolean isSigned) {
-		if (!isSigned) {
-			return Integer.parseInt(binaryString, 2); // if unsigned
-		} else {
-			String copyString = '0' + binaryString.substring(1); // Considering only first n-1 bits
-			int ans = Integer.parseInt(copyString, 2); // The integer corresponding to first n-1
-			// bits
 
-			// For length 32, we can't compute 2^31 in int data type
-			if (binaryString.length() == 32) {
-				if (binaryString.charAt(0) == '1') { // If the binary string represents negative
-					// number
-
-					int power = (1 << 30); // 2^30 // We can't store 2^31 in 4 bytes
-					// Subtracting 2^31 i.e 2*(2^30) out of it
-					ans -= power;
-					ans -= power;
-				}
-			} else {
-				if (binaryString.charAt(0) == '1') { // If the binary string represents negative
-					// number
-					int power = (1 << (binaryString.length() - 1));
-					ans -= power;
-				}
-			}
-
-			return ans;
-		}
-	}
-
-	// Function to get the Register Operand whose value is decimal represented value of given binary
-	// string
-	private Operand getRegisterOperand(String val) {
-		Operand operand = new Operand(); // Making a new operand
-		operand.setOperandType(OperandType.Register); // setting operand type as Register
-		operand.setValue(binaryToDecimal(val, false)); // setting its value
-		return operand;
-	}
-
-	// Function to get the Immediate Operand whole value is decimal represented value of given
-	// binary string
 	private Operand getImmediateOperand(String val) {
 		Operand operand = new Operand(); // Making a new operand
 		operand.setOperandType(OperandType.Immediate); // setting operand type as Register
-		operand.setValue(binaryToDecimal(val, true)); // setting its value
+		operand.setValue(convertBinaryToDecimal(val, true)); // setting its value
 		return operand;
 	}
 }

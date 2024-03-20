@@ -56,7 +56,7 @@ public class Processor {
 		RWUnit = new RegisterWrite(this, MA_RW_Latch, IF_EnableLatch);
 
 		DataInterlockUnit =
-				new DataInterlock(this, IF_EnableLatch, IF_OF_Latch, EX_MA_Latch, MA_RW_Latch);
+				new DataInterlock(this, IF_EnableLatch, IF_OF_Latch, EX_MA_Latch, MA_RW_Latch,OF_EX_Latch);
 		ControlInterlockUnit = new ControlInterlock(IF_OF_Latch, EX_IF_Latch);
 	}
 	

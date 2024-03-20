@@ -37,7 +37,7 @@ public class IF_OF_LatchType {
 		this.isNop = isNop;
 	}
 
-	public boolean getNop() {
+	public boolean isNop() {
 		return this.isNop;
 	}
 

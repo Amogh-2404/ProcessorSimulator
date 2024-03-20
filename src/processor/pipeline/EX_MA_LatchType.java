@@ -21,11 +21,8 @@ public class EX_MA_LatchType {
 		return MA_enable;
 	}
 
-	public void setMA_enable(boolean mA_enable) {
-		MA_enable = mA_enable;
-	}
 
-	public Instruction getInstruction(){return inst;}
+
 
 	public void setInstruction(Instruction newIns){inst = newIns;}
 
@@ -37,9 +34,12 @@ public class EX_MA_LatchType {
 		aluResult = result;
 	}
 
-	public int getExcess() {
-		return excess;
+	public void setMA_enable(boolean mA_enable) {
+		MA_enable = mA_enable;
 	}
+
+	public Instruction getInstruction(){return inst;}
+
 
 	public void setExcess(int exc) {
 		excess = exc;
@@ -52,4 +52,12 @@ public class EX_MA_LatchType {
 	public void setOperand(int operand) {
 		op = operand;
 	}
+
+
+
+	public int getExcess() {
+		return excess;
+	}
+
+
 }

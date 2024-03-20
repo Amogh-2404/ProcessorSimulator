@@ -21,18 +21,62 @@ public class Execute {
 	public void performEX()
 	{
 		if (OF_EX_Latch.isEX_enable()) {
-			Instruction inst = OF_EX_Latch.getInstruction(); // Getting the instruction
-			EX_MA_Latch.setInstruction(inst); // Passing instruction as control signals to pipeline
+			Instruction inst = OF_EX_Latch.getInstruction();
+			EX_MA_Latch.setInstruction(inst);
 
-			if (inst != null) { // If instruction is not a null (or nop) instruction
-				compute(inst); // executing the instruction
+			if (inst != null) {
+				compute(inst);
 
-				// Performing Control-Interlock validation for branch instructions
+
 				containingProcessor.getControlInterlockUnit().validate();
+			}
+			// TODO:- DEBUG
+			else{
+				EX_MA_Latch.setInstruction(null);
 			}
 
 			OF_EX_Latch.setEX_enable(false);
 			EX_MA_Latch.setMA_enable(true);
+		}
+	}
+
+	private int convertDecimalToBinary(String binaryString, boolean isSigned) {
+		if (!isSigned) {
+			return Integer.parseInt(binaryString, 2);
+
+		} else {
+			String copyString = '0' + binaryString.substring(1);
+			int answer = Integer.parseInt(copyString, 2);
+			// bits
+
+			if (binaryString.length() == 32) {
+				int power = (1 << 30);
+				if (binaryString.charAt(0) == '1') {
+					answer -= power;
+					answer -= power;
+				}
+			} else {
+				int power = (1 << (binaryString.length() - 1));
+				if (binaryString.charAt(0) == '1') {
+					// number
+					answer -= power;
+				}
+			}
+
+			return answer;
+		}
+	}
+
+	private int getResult(long res) {
+		String binaryString = Long.toBinaryString(res);
+		if (binaryString.length() <= 32) {
+			return (int) res;
+
+		} else {
+			EX_MA_Latch.setExcess(convertDecimalToBinary( // Setting excess
+					binaryString.substring(0, binaryString.length() - 32), (res < 0)));
+
+			return convertDecimalToBinary(binaryString.substring(binaryString.length() - 32), (res < 0));
 		}
 	}
 
@@ -48,13 +92,6 @@ public class Execute {
 			case add:
 			case addi:{
 				EX_MA_Latch.setAluResult(getResult(op1+second));
-				EX_IF_Latch.setIsBranchTaken(false);
-				break;
-			}
-
-			case sub:
-			case subi:{
-				EX_MA_Latch.setAluResult(getResult(op1-second));
 				EX_IF_Latch.setIsBranchTaken(false);
 				break;
 			}
@@ -80,6 +117,15 @@ public class Execute {
 				break;
 			}
 
+			case sub:
+			case subi:{
+				EX_MA_Latch.setAluResult(getResult(op1-second));
+				EX_IF_Latch.setIsBranchTaken(false);
+				break;
+			}
+
+
+
 			case or:
 			case ori:{
 				EX_MA_Latch.setAluResult(getResult(op1 | second));
@@ -90,6 +136,21 @@ public class Execute {
 			case xor:
 			case xori:{
 				EX_MA_Latch.setAluResult(getResult(op1 ^ second));
+				EX_IF_Latch.setIsBranchTaken(false);
+				break;
+			}
+
+
+
+			case sra:
+			case srai:{
+				EX_MA_Latch.setAluResult(getResult(op1 >> second));
+				EX_IF_Latch.setIsBranchTaken(false);
+				break;
+			}
+
+			case load:{
+				EX_MA_Latch.setAluResult(getResult(op1 + imm));
 				EX_IF_Latch.setIsBranchTaken(false);
 				break;
 			}
@@ -111,19 +172,6 @@ public class Execute {
 			case srl:
 			case srli:{
 				EX_MA_Latch.setAluResult(getResult(op1 >>> second));
-				EX_IF_Latch.setIsBranchTaken(false);
-				break;
-			}
-
-			case sra:
-			case srai:{
-				EX_MA_Latch.setAluResult(getResult(op1 >> second));
-				EX_IF_Latch.setIsBranchTaken(false);
-				break;
-			}
-
-			case load:{
-				EX_MA_Latch.setAluResult(getResult(op1 + imm));
 				EX_IF_Latch.setIsBranchTaken(false);
 				break;
 			}
@@ -155,6 +203,14 @@ public class Execute {
 				break;
 			}
 
+
+
+			case jmp:{
+				EX_IF_Latch.setIsBranchTaken(true);
+				EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+				break;
+			}
+
 			case blt:{
 				if (op1 < op2){
 					EX_IF_Latch.setIsBranchTaken(true);
@@ -175,63 +231,18 @@ public class Execute {
 				break;
 			}
 
-			case jmp:{
-				EX_IF_Latch.setIsBranchTaken(true);
-				EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
-				break;
-			}
-
 			case end:{
 				EX_IF_Latch.setIsBranchTaken(false);
 				break;
 			}
 
 			default:
-				Misc.printErrorAndExit("Unknown Instruction!!");
-		}
-	}
-
-	private int getResult(long res) {
-		String binaryString = Long.toBinaryString(res);
-		if (binaryString.length() <= 32) { // if number of bits are <= 32
-			return (int) res;
-
-		} else {
-			EX_MA_Latch.setExcess(binaryToDecimal( // Setting excess
-					binaryString.substring(0, binaryString.length() - 32), (res < 0)));
-
-			return binaryToDecimal(binaryString.substring(binaryString.length() - 32), (res < 0));
+				Misc.printErrorAndExit("Instruction not present in the switch case of Execute.java");
 		}
 	}
 
 
-	private int binaryToDecimal(String binaryString, boolean isSigned) {
-		if (!isSigned) { // if not signed
-			return Integer.parseInt(binaryString, 2);
 
-		} else {
-			String copyString = '0' + binaryString.substring(1); // Considering only first n-1 bits
-			int ans = Integer.parseInt(copyString, 2); // The integer corresponding to first n-1
-			// bits
 
-			if (binaryString.length() == 32) { // if length is 32
-				int power = (1 << 30); // 2^30 // We can't store 2^31 in 4 bytes
-				if (binaryString.charAt(0) == '1') { // If the binary string represents negative
-					// number
-					// Subtracting 2^31 i.e 2*(2^30) out of it
-					ans -= power;
-					ans -= power;
-				}
-			} else {
-				int power = (1 << (binaryString.length() - 1));
-				if (binaryString.charAt(0) == '1') { // If the binary string represents negative
-					// number
-					ans -= power;
-				}
-			}
-
-			return ans;
-		}
-	}
 }
 

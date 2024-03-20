@@ -5,6 +5,7 @@ import processor.Processor;
 
 import generic.Instruction;
 import generic.Misc;
+import processor.interlocks.DataInterlock;
 
 public class RegisterWrite {
 	Processor containingProcessor;
@@ -20,24 +21,22 @@ public class RegisterWrite {
 
 	public void performRW() {
 		if (MA_RW_Latch.isRW_enable()) {
-			Instruction inst = MA_RW_Latch.getInstruction(); // Instruction as control signals
+			Instruction instructionInRW = MA_RW_Latch.getInstruction();
 
-			if (inst != null) { // If instruction is not a null (or nop) instruction
+			if (instructionInRW != null) {
 
 				int ldResult = MA_RW_Latch.getLdResult(); // Load result
 				int aluResult = MA_RW_Latch.getAluResult(); // ALU result
 
 				int excess = MA_RW_Latch.getExcess(); // excess bits
-				containingProcessor.getRegisterFile().setValue(31, excess); // setting excess bits
-				// to
-				// x31 register
+				containingProcessor.getRegisterFile().setValue(31, excess);
 
-				int rd = 0; // Destination register where we need to store result
-				if (inst.getDestinationOperand() != null) { // If it is not an end instruction
-					rd = inst.getDestinationOperand().getValue();
+				int destinationRegister = 0; // Destination register where we need to store result
+				if (instructionInRW.getDestinationOperand() != null) { // If it is not an end instruction
+					destinationRegister = instructionInRW.getDestinationOperand().getValue();
 				}
 
-				switch (inst.getOperationType()) {
+				switch (instructionInRW.getOperationType()) {
 
 					case add:
 					case sub:
@@ -63,13 +62,13 @@ public class RegisterWrite {
 					case srli:
 					case srai: {
 						// Storing ALU result at destination register
-						containingProcessor.getRegisterFile().setValue(rd, aluResult);
+						containingProcessor.getRegisterFile().setValue(destinationRegister, aluResult);
 						break;
 					}
 
 					case load: {
 						// Storing Load register at destination register
-						containingProcessor.getRegisterFile().setValue(rd, ldResult);
+						containingProcessor.getRegisterFile().setValue(destinationRegister, ldResult);
 						break;
 					}
 
@@ -83,8 +82,7 @@ public class RegisterWrite {
 						break;
 
 					case end: {
-						// if instruction being processed is an end instruction, remember to call
-						Simulator.setSimulationComplete(true); // Setting simulation as complete
+						Simulator.setSimulationComplete(true);
 						break;
 					}
 
@@ -96,6 +94,7 @@ public class RegisterWrite {
 			MA_RW_Latch.setRW_enable(false);
 			IF_EnableLatch.setIF_enable(true);
 			Simulator.incNumInst();
+			containingProcessor.getDataInterlockUnit().setFinalInstruction(instructionInRW);
 
 		}
 	}

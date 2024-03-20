@@ -1,6 +1,5 @@
 package processor.pipeline;
 
-import generic.Simulator;
 import processor.Processor;
 
 public class InstructionFetch {
@@ -22,33 +21,32 @@ public class InstructionFetch {
 	public void performIF() {
 		if (IF_EnableLatch.isIF_enable()) {
 
-			if (!IF_EnableLatch.getStall()) { // If IF stage is not stall
-				if (EX_IF_Latch.getIsBranchTaken()) { // if isBranchTaken signal is True
-					// Updating the pc of the processor
+			if (!IF_EnableLatch.isStall()) {
+				if (EX_IF_Latch.getIsBranchTaken()) {
+
 					containingProcessor.getRegisterFile()
 							.setProgramCounter(EX_IF_Latch.getBranchPC());
 
-					EX_IF_Latch.setIsBranchTaken(false); // Setting isBranchTaken signal to False
+					EX_IF_Latch.setIsBranchTaken(false); // Resetting the branch taken flag
 				}
 
 				int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
 
 				int newInstruction = containingProcessor.getMainMemory().getWord(currentPC);
+
 				IF_OF_Latch.setInstruction(newInstruction);
-				IF_OF_Latch.setNop(false); // Setting new instruction as not nop
 
-				IF_OF_Latch.setCurrentPC(currentPC); // passing the current pc ahead in pipeline
+				IF_OF_Latch.setNop(false);
 
-				
+
+				IF_OF_Latch.setCurrentPC(currentPC);
+
 
 				containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
-				 // Incrementing the Number of instructions fetched
-//				Simulator.incNumInst();
+
 			}
 
-			// As IF stage will always be enabled to fetch instructions
-			// IF_EnableLatch.setIF_enable(false);
 
 			IF_OF_Latch.setOF_enable(true);
 		}

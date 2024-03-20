@@ -21,7 +21,7 @@ public class IF_EnableLatchType {
 		this.isStall = isStall;
 	}
 
-	public boolean getStall() {
+	public boolean isStall() {
 		return this.isStall;
 	}
 

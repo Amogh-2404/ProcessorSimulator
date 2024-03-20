@@ -18,17 +18,17 @@ public class MemoryAccess {
 
 	public void performMA() {
 		if (EX_MA_Latch.isMA_enable()) {
-			Instruction inst = EX_MA_Latch.getInstruction(); // Instruction as control signal
-			MA_RW_Latch.setInstruction(inst); // Passing instruction forward in pipeline
+			Instruction inst = EX_MA_Latch.getInstruction();
+			MA_RW_Latch.setInstruction(inst);
 
-			if (inst != null) { // If instruction is not a null (or nop) instruction
-				int aluResult = EX_MA_Latch.getAluResult(); // Alu Result obtained
-				int operand = EX_MA_Latch.getOperand(); // Operand to store in case of store
+			if (inst != null) {
+				int aluResult = EX_MA_Latch.getAluResult();
+				int operand = EX_MA_Latch.getOperand();
 				// instruction
-				int excess = EX_MA_Latch.getExcess(); // Excess bits to store at x31 register
-				MA_RW_Latch.setExcess(excess); // Passing excess bits to Register Writeback stage
+				int excess = EX_MA_Latch.getExcess();
+				MA_RW_Latch.setExcess(excess);
 
-				// Performing on base of operation of instruction
+
 				switch (inst.getOperationType()) {
 					case load: {
 						// Alu Result will be address from which we have to load in case of load
@@ -83,6 +83,10 @@ public class MemoryAccess {
 					default:
 						Misc.printErrorAndExit("Unknown Instruction!!");
 				}
+			}
+			// TODO:- DEBUG
+			else{
+				MA_RW_Latch.setInstruction(null);
 			}
 
 
