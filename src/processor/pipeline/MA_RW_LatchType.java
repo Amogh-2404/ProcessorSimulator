@@ -12,6 +12,7 @@ public class MA_RW_LatchType {
 	public MA_RW_LatchType()
 	{
 		RW_enable = false;
+		ldResult = aluResult = excess = 0;
 		excess = 0;
 	}
 
