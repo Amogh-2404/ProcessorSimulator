@@ -5,7 +5,7 @@ import generic.*;
 import processor.Clock;
 import processor.Processor;
 
-public class Execute {
+public class Execute implements Element {
 	Processor containingProcessor;
 	OF_EX_LatchType OF_EX_Latch;
 	EX_MA_LatchType EX_MA_Latch;
@@ -328,7 +328,35 @@ public class Execute {
 	}
 
 
+	@Override
+	public void handleEvent(Event event) {
+		if (EX_MA_Latch.isMA_enable()) { // If MA stage is busy
+			// System.out.println("Event postponed | MA Busy"); // TEST
 
+			event.setEventTime(Clock.getCurrentTime() + 1);
+			Simulator.getEventQueue().addEvent(event);
+		} else {
+			ExecutionCompleteEvent e = (ExecutionCompleteEvent) event;
 
-}
+			// System.out.println("Event Triggered in EX: \n" + event); // TEST
+
+			OF_EX_Latch.setEX_busy(false);
+
+			OF_EX_Latch.setEX_enable(false);
+
+			EX_IF_Latch.setIsBranchTaken(e.isBranchTaken());
+			EX_IF_Latch.setBranchPC(e.getBranchPC());
+
+			EX_MA_Latch.setMA_enable(true);
+			EX_MA_Latch.setInstruction(e.getInst());
+			EX_MA_Latch.setAluResult(e.getAluResult());
+			EX_MA_Latch.setExcess(e.getExcess());
+			EX_MA_Latch.setOperand(e.getOp());
+
+			// Performing Control-Interlock validation for branch instructions
+			containingProcessor.getControlInterlockUnit().validate();
+		}
+	}
+	}
+
 

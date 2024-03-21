@@ -25,7 +25,7 @@ public class MemoryAccess implements Element {
 //			MA_RW_Latch.setInstruction(inst);
 			this.instruction = inst;
 
-			if (!EX_MA_Latch.isMABusy()) {
+			if (!EX_MA_Latch.getIsMA_busy() && !EX_MA_Latch.getIsMA_busy()) {
 
 				if (inst != null) {
 					int aluResult = EX_MA_Latch.getAluResult();
