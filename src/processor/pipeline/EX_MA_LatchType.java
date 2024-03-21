@@ -4,7 +4,7 @@ import generic.Instruction;
 
 public class EX_MA_LatchType {
 	
-	boolean MA_enable;
+	boolean MA_enable, isMA_busy;
 
 	Instruction inst;
 
@@ -21,8 +21,12 @@ public class EX_MA_LatchType {
 		return MA_enable;
 	}
 
-
-
+	public boolean getIsMA_busy(){
+		return isMA_busy;
+	}
+	public void setIsMA_busy(boolean isMA_busy){
+		this.isMA_busy = isMA_busy;
+	}
 
 	public void setInstruction(Instruction newIns){inst = newIns;}
 

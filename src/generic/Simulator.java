@@ -14,6 +14,8 @@ public class Simulator {
 	static int numDataHazards; // Number of times the OF stage needed to stall because of a data
 								// hazard
 	static int numNop; // Number of times an instruction on a wrong branch path entered the pipeline
+
+	static EventQueue eventQueue = new EventQueue();
 	
 	public static void setupSimulation(String assemblyProgramFile, Processor p)
 	{
@@ -82,6 +84,7 @@ public class Simulator {
 			processor.getRWUnit().performRW();
 			processor.getMAUnit().performMA();
 			processor.getEXUnit().performEX();
+			eventQueue.processEvents();
 			processor.getOFUnit().performOF();
 			processor.getIFUnit().performIF();
 			Clock.incrementClock();
@@ -95,6 +98,11 @@ public class Simulator {
 		Statistics.setNumberOfDataHazards(numDataHazards);
 		Statistics.setNumberOfNop(numNop);
 
+	}
+
+	public static EventQueue getEventQueue()
+	{
+		return eventQueue;
 	}
 	
 	public static void setSimulationComplete(boolean value)

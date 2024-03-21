@@ -1,10 +1,12 @@
 package processor.pipeline;
 
+import generic.Element;
+import generic.Event;
 import generic.Instruction;
 import processor.Processor;
 import generic.Misc;
 
-public class MemoryAccess {
+public class MemoryAccess implements Element {
 	Processor containingProcessor;
 	EX_MA_LatchType EX_MA_Latch;
 	MA_RW_LatchType MA_RW_Latch;
@@ -89,4 +91,8 @@ public class MemoryAccess {
 		}
 	}
 
+	@Override
+	public void handleEvent(Event event) {
+
+	}
 }

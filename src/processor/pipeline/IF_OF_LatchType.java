@@ -5,7 +5,8 @@ public class IF_OF_LatchType {
 	boolean OF_enable;
 	int instruction ,currentPC;
 
-	boolean isNop, isStall;
+
+	boolean isNop, isStall, isOF_busy;
 	
 	public IF_OF_LatchType()
 	{
@@ -16,6 +17,15 @@ public class IF_OF_LatchType {
 	public boolean isOF_enable() {
 		return OF_enable;
 	}
+
+	public boolean getOF_busy() {
+		return isOF_busy;
+	}
+
+	public void setOF_busy(boolean isOF_busy) {
+		this.isOF_busy = isOF_busy;
+	}
+
 
 	public void setOF_enable(boolean oF_enable) {
 		OF_enable = oF_enable;
@@ -37,7 +47,7 @@ public class IF_OF_LatchType {
 		this.isNop = isNop;
 	}
 
-	public boolean isNop() {
+	public boolean getIsNop() {
 		return this.isNop;
 	}
 

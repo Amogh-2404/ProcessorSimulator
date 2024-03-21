@@ -4,6 +4,9 @@ public class IF_EnableLatchType {
 	
 	boolean IF_enable;
 	boolean isStall; // whether IF stage is stalling or not
+
+	boolean isIFBusy;
+
 	public IF_EnableLatchType()
 	{
 		IF_enable = true;
@@ -11,6 +14,10 @@ public class IF_EnableLatchType {
 
 	public boolean isIF_enable() {
 		return IF_enable;
+	}
+
+	public void setIF_busy(boolean arg){
+		 isIFBusy = arg;
 	}
 
 	public void setIF_enable(boolean iF_enable) {
@@ -26,4 +33,7 @@ public class IF_EnableLatchType {
 	}
 
 
+	public void setIF_Busy(boolean b) {
+		isIFBusy = b;
+	}
 }

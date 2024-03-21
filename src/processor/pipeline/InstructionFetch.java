@@ -1,8 +1,10 @@
 package processor.pipeline;
 
+import generic.*;
+import processor.Clock;
 import processor.Processor;
 
-public class InstructionFetch {
+public class InstructionFetch implements Element {
 	
 	Processor containingProcessor;
 	IF_EnableLatchType IF_EnableLatch;
@@ -12,6 +14,9 @@ public class InstructionFetch {
 	public static boolean additionalNop = false;
 
 	boolean firstInstruction = true;
+
+	int previousPC;
+
 	public InstructionFetch(Processor containingProcessor, IF_EnableLatchType iF_EnableLatch, IF_OF_LatchType iF_OF_Latch, EX_IF_LatchType eX_IF_Latch)
 	{
 		this.containingProcessor = containingProcessor;
@@ -23,55 +28,64 @@ public class InstructionFetch {
 	public void performIF() {
 		if (IF_EnableLatch.isIF_enable()) {
 
-			if (!IF_EnableLatch.isStall()) {
-				if (EX_IF_Latch.getIsBranchTaken() && additionalNop==false) {
+			if(!IF_EnableLatch.isIFBusy) {
 
-					containingProcessor.getRegisterFile()
-							.setProgramCounter(EX_IF_Latch.getBranchPC());
+				if (!IF_EnableLatch.isStall()) {
+					if (EX_IF_Latch.getIsBranchTaken() && additionalNop == false) {
 
-					EX_IF_Latch.setIsBranchTaken(false);
+						containingProcessor.getRegisterFile()
+								.setProgramCounter(EX_IF_Latch.getBranchPC());
 
-					int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
+						EX_IF_Latch.setIsBranchTaken(false);
 
-					int newInstruction = containingProcessor.getMainMemory().getWord(currentPC);
+						int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
 
-					IF_OF_Latch.setInstruction(newInstruction);
+						Simulator.getEventQueue().addEvent(new MemoryReadEvent(Clock.getCurrentTime(), (Element) this, (Element) containingProcessor.getMainMemory(), currentPC));
 
-					IF_OF_Latch.setNop(false);
+						IF_EnableLatch.setIF_Busy(true);
 
+						previousPC = currentPC;
 
-					IF_OF_Latch.setCurrentPC(currentPC);
+						containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
+					} else if (EX_IF_Latch.getIsBranchTaken() && additionalNop == true) {
+						IF_OF_Latch.setNop(true);
+					} else {
+						int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
+						Simulator.getEventQueue().addEvent(new MemoryReadEvent(Clock.getCurrentTime(), (Element) this, (Element) containingProcessor.getMainMemory(), currentPC));
 
-					containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
+						previousPC = currentPC;
 
-				} else if (EX_IF_Latch.getIsBranchTaken() && additionalNop==true) {
-					IF_OF_Latch.setNop(true);
-				}
-				else {
-					int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
+						containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
-					int newInstruction = containingProcessor.getMainMemory().getWord(currentPC);
+						IF_EnableLatch.setIF_Busy(true);
+					}
 
-					IF_OF_Latch.setInstruction(newInstruction);
-
-					IF_OF_Latch.setNop(false);
-
-
-					IF_OF_Latch.setCurrentPC(currentPC);
-
-
-					containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 
 				}
-
-
 
 			}
-
-
 			IF_OF_Latch.setOF_enable(true);
 		}
 	}
 
+	@Override
+	public void handleEvent(Event event) {
+		if (IF_OF_Latch.getOF_busy()){
+			// Postpone the event if the next stage(OF) is busy
+			event.setEventTime(Clock.getCurrentTime() + 1);
+			Simulator.getEventQueue().addEvent(event);
+		}
+		// TODO:- Potential spot to add the condition if the instruction in the next latch is a nop
+		else{
+			MemoryResponseEvent e = (MemoryResponseEvent) event;
+			IF_OF_Latch.setInstruction(e.getValue());
+			IF_OF_Latch.setOF_enable(true);
+			IF_EnableLatch.setIF_Busy(false);
+
+			IF_OF_Latch.setNop(true);
+			IF_OF_Latch.setCurrentPC(previousPC);
+		}
+
+	}
 }

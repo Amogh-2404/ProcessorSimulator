@@ -1,6 +1,10 @@
 package processor.memorysystem;
 
-public class MainMemory {
+import configuration.Configuration;
+import generic.*;
+import processor.Clock;
+
+public class MainMemory implements Element {
 	int[] memory;
 	
 	public MainMemory()
@@ -32,4 +36,30 @@ public class MainMemory {
 		sb.append("\n");
 		return sb.toString();
 	}
+
+	@Override
+	public void handleEvent(generic.Event e) {
+		if (e.getEventType() == Event.EventType.MemoryRead){
+			MemoryReadEvent event = (MemoryReadEvent) e;
+			Simulator.getEventQueue().addEvent(new MemoryResponseEvent(
+					Clock.getCurrentTime() + Configuration.mainMemoryLatency,
+					(Element) this,
+					(Element) event.getRequestingElement(),
+					getWord(event.getAddressToReadFrom())
+			));
+		}
+
+		if (e.getEventType() == Event.EventType.MemoryWrite){
+			MemoryWriteEvent event = (MemoryWriteEvent) e;
+			setWord(event.getAddressToWriteTo(), event.getValue());
+			Simulator.getEventQueue().addEvent(new MemoryResponseEvent(
+					Clock.getCurrentTime() + Configuration.mainMemoryLatency,
+					(Element) this,
+					(Element) event.getRequestingElement(),
+					event.getAddressToWriteTo()
+			));
+		}
+
+	}
+
 }

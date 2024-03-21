@@ -23,26 +23,36 @@ public class OperandFetch {
 	{
 		if (IF_OF_Latch.isOF_enable()) {
 
-			if (IF_OF_Latch.isNop()) {
-				OF_EX_Latch.setInstruction(null);
-				Simulator.incrementNop();
-				InstructionFetch.additionalNop = !InstructionFetch.additionalNop;
-			} else {
+			if (!OF_EX_Latch.isEX_busy){ // TODO:- Check if one more condition is needed or not
+				IF_OF_Latch.setOF_busy(false);
 
-				containingProcessor.getDataInterlockUnit().checkConflict();
-
-				if (IF_OF_Latch.getStall()) {
+				if (IF_OF_Latch.getIsNop()) {
 					OF_EX_Latch.setInstruction(null);
-					Simulator.incNumDataHazards();
-
+					Simulator.incrementNop();
+					InstructionFetch.additionalNop = !InstructionFetch.additionalNop;
 				} else {
-					decodeTheInstruction();
 
+					containingProcessor.getDataInterlockUnit().checkConflict();
+
+					if (IF_OF_Latch.getStall()) {
+						OF_EX_Latch.setInstruction(null);
+						Simulator.incNumDataHazards();
+
+					} else {
+						decodeTheInstruction();
+						IF_OF_Latch.setOF_enable(false);
+						OF_EX_Latch.setEX_enable(true);
+					}
 				}
+
+		}
+		else{
+			IF_OF_Latch.setOF_busy(true);
 			}
 
 			IF_OF_Latch.setOF_enable(false);
 			OF_EX_Latch.setEX_enable(true);
+
 		}
 	}
 

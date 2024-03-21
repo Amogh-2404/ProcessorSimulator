@@ -4,7 +4,7 @@ import generic.Instruction;
 
 public class OF_EX_LatchType {
 	
-	boolean EX_enable;
+	boolean EX_enable, isEX_busy = false, isEX_MA_busy = false, isValidInst;  //TODO:- Redundant EX_MA ?
 
 	Instruction inst;
 
@@ -15,6 +15,14 @@ public class OF_EX_LatchType {
 	public OF_EX_LatchType()
 	{
 		EX_enable = false;
+	}
+
+	public boolean getEX_busy(){
+		return isEX_busy;
+	}
+
+	public void setEX_busy(boolean isEX_busy){
+		this.isEX_busy = isEX_busy;
 	}
 
 	public boolean isEX_enable() {

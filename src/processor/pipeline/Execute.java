@@ -1,7 +1,8 @@
 package processor.pipeline;
 
-import generic.Instruction;
-import generic.Misc;
+import configuration.Configuration;
+import generic.*;
+import processor.Clock;
 import processor.Processor;
 
 public class Execute {
@@ -9,6 +10,87 @@ public class Execute {
 	OF_EX_LatchType OF_EX_Latch;
 	EX_MA_LatchType EX_MA_Latch;
 	EX_IF_LatchType EX_IF_Latch;
+
+	int aluResult, op, excess;
+
+	boolean isBranchTaken;
+
+	int branchPC;
+
+	private void scheduleEvent(Instruction inst) {
+
+		switch (inst.getOperationType()) {
+			case mul:
+			case muli: {
+				// System.out.println("Scheduling Event...\n"); // TEST
+
+				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+						Clock.getCurrentTime() + Configuration.multiplier_latency, (Element) this, (Element) this, inst, this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+				OF_EX_Latch.setEX_busy(true);
+				break;
+			}
+			case div:
+			case divi: {
+				// System.out.println("Scheduling Event...\n"); // TEST
+
+				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+						Clock.getCurrentTime() + Configuration.divider_latency, (Element) this, (Element) this, inst,
+						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+				OF_EX_Latch.setEX_busy(true);
+				break;
+			}
+
+			case add:
+			case sub:
+			case and:
+			case or:
+			case xor:
+			case slt:
+			case sll:
+			case srl:
+			case sra:
+			case addi:
+			case subi:
+			case andi:
+			case ori:
+			case xori:
+			case slti:
+			case slli:
+			case srli:
+			case srai:
+			case load:
+			case store:
+			case beq:
+			case bne:
+			case blt:
+			case bgt: {
+				// System.out.println("Scheduling Event...\n"); // TEST
+
+				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+						Clock.getCurrentTime() + Configuration.ALU_latency, (Element) this, (Element) this, inst,
+						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+				OF_EX_Latch.setEX_busy(true);
+				break;
+			}
+
+			case jmp:
+			case end: {
+				// Performing Control-Interlock validation for branch instructions
+				containingProcessor.getControlInterlockUnit().validate();
+
+				OF_EX_Latch.setEX_busy(false);
+				OF_EX_Latch.setEX_enable(false);
+
+
+				EX_MA_Latch.setInstruction(inst);
+				EX_MA_Latch.setMA_enable(true);
+				break;
+			}
+
+			default:
+				Misc.printErrorAndExit("Unknown Instruction!!");
+		}
+	}
 	
 	public Execute(Processor containingProcessor, OF_EX_LatchType oF_EX_Latch, EX_MA_LatchType eX_MA_Latch, EX_IF_LatchType eX_IF_Latch)
 	{
@@ -21,17 +103,22 @@ public class Execute {
 	public void performEX()
 	{
 		if (OF_EX_Latch.isEX_enable()) {
-			Instruction inst = OF_EX_Latch.getInstruction();
-			EX_MA_Latch.setInstruction(inst);
 
-			if (inst != null) {
-				compute(inst);
+			if (!EX_MA_Latch.getIsMA_busy()) {
+				OF_EX_Latch.setEX_busy(true);
+				Instruction inst = OF_EX_Latch.getInstruction();
+				EX_MA_Latch.setInstruction(inst);
 
-				containingProcessor.getControlInterlockUnit().validate();
+				if (inst != null) {
+					compute(inst);
+					scheduleEvent(inst);
+					containingProcessor.getControlInterlockUnit().validate();
+				} else {
+					EX_MA_Latch.setInstruction(null);
+				}
 			}
-			// TODO:- DEBUG
 			else{
-				EX_MA_Latch.setInstruction(null);
+				EX_MA_Latch.setIsMA_busy(true);
 			}
 
 			OF_EX_Latch.setEX_enable(false);
@@ -90,36 +177,36 @@ public class Execute {
 		switch(inst.getOperationType()){
 			case add:
 			case addi:{
-				EX_MA_Latch.setAluResult(getResult(op1+second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1+second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case mul:
 			case muli:{
-				EX_MA_Latch.setAluResult(getResult(op1*second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1*second));
+				this.isBranchTaken = (false);
 				break;}
 
 			case div:
 			case divi:{
-				EX_MA_Latch.setAluResult(getResult(op1/second));
-				EX_MA_Latch.setExcess((int)(op1%second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1/second));
+				this.excess = ((int)(op1%second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case and:
 			case andi:{
-				EX_MA_Latch.setAluResult(getResult(op1 & second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 & second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case sub:
 			case subi:{
-				EX_MA_Latch.setAluResult(getResult(op1-second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1-second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
@@ -127,15 +214,15 @@ public class Execute {
 
 			case or:
 			case ori:{
-				EX_MA_Latch.setAluResult(getResult(op1 | second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 | second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case xor:
 			case xori:{
-				EX_MA_Latch.setAluResult(getResult(op1 ^ second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 ^ second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
@@ -143,61 +230,61 @@ public class Execute {
 
 			case sra:
 			case srai:{
-				EX_MA_Latch.setAluResult(getResult(op1 >> second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 >> second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case load:{
-				EX_MA_Latch.setAluResult(getResult(op1 + imm));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 + imm));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case slt:
 			case slti:{
-				EX_MA_Latch.setAluResult((op1 < second) ? 1 : 0);
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = ((op1 < second) ? 1 : 0);
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case sll:
 			case slli:{
-				EX_MA_Latch.setAluResult(getResult(op1 << second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 << second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case srl:
 			case srli:{
-				EX_MA_Latch.setAluResult(getResult(op1 >>> second));
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op1 >>> second));
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case store:{
-				EX_MA_Latch.setAluResult(getResult(op2 + imm));
-				EX_MA_Latch.setOperand((int)op1);
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.aluResult = (getResult(op2 + imm));
+				this.op = ((int)op1);
+				this.isBranchTaken = (false);
 				break;
 			}
 
 			case beq:{
 				if (op1 == op2){
-					EX_IF_Latch.setIsBranchTaken(true);
-					EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+					this.isBranchTaken = (true);
+					this.branchPC =  (OF_EX_Latch.getBranchTarget());
 				}else{
-					EX_IF_Latch.setIsBranchTaken(false);
+					this.isBranchTaken = (false);
 				}
 				break;
 			}
 
 			case bne:{
 				if (op1 != op2){
-					EX_IF_Latch.setIsBranchTaken(true);
-					EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+					this.isBranchTaken = (true);
+					this.branchPC =  (OF_EX_Latch.getBranchTarget());
 				}else{
-					EX_IF_Latch.setIsBranchTaken(false);
+					this.isBranchTaken = (false);
 				}
 				break;
 			}
@@ -205,33 +292,33 @@ public class Execute {
 
 
 			case jmp:{
-				EX_IF_Latch.setIsBranchTaken(true);
-				EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+				this.isBranchTaken = (true);
+				this.branchPC =  (OF_EX_Latch.getBranchTarget());
 				break;
 			}
 
 			case blt:{
 				if (op1 < op2){
-					EX_IF_Latch.setIsBranchTaken(true);
-					EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+					this.isBranchTaken = (true);
+					this.branchPC =  (OF_EX_Latch.getBranchTarget());
 				}else{
-					EX_IF_Latch.setIsBranchTaken(false);
+					this.isBranchTaken = (false);
 				}
 				break;
 			}
 
 			case bgt:{
 				if (op1 > op2){
-					EX_IF_Latch.setIsBranchTaken(true);
-					EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+					this.isBranchTaken = (true);
+					this.branchPC =  (OF_EX_Latch.getBranchTarget());
 				}else{
-					EX_IF_Latch.setIsBranchTaken(false);
+					this.isBranchTaken = (false);
 				}
 				break;
 			}
 
 			case end:{
-				EX_IF_Latch.setIsBranchTaken(false);
+				this.isBranchTaken = (false);
 				break;
 			}
 
