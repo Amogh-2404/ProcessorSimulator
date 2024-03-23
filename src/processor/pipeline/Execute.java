@@ -104,7 +104,7 @@ public class Execute implements Element {
 	{
 		if (OF_EX_Latch.isEX_enable()) {
 
-			if (!EX_MA_Latch.getIsMA_busy()) {
+			if (!OF_EX_Latch.isEX_busy) {
 				OF_EX_Latch.setEX_busy(true);
 				Instruction inst = OF_EX_Latch.getInstruction();
 				EX_MA_Latch.setInstruction(inst);
@@ -113,12 +113,19 @@ public class Execute implements Element {
 					compute(inst);
 					scheduleEvent(inst);
 					containingProcessor.getControlInterlockUnit().validate();
+					OF_EX_Latch.setIsValidInstruction(false);
 				} else {
 					EX_MA_Latch.setInstruction(null);
+
+					EX_IF_Latch.setIsBranchTaken(false);
+
+					OF_EX_Latch.setIsValidInstruction(false);
+
+					EX_MA_Latch.setIsValidInstruction(true);
 				}
 			}
 			else{
-				EX_MA_Latch.setIsMA_busy(true);
+				OF_EX_Latch.setEX_busy(false);
 			}
 
 			OF_EX_Latch.setEX_enable(false);

@@ -4,7 +4,7 @@ import generic.Instruction;
 
 public class MA_RW_LatchType {
 	
-	boolean RW_enable;
+	boolean RW_enable, setIsValidInstruction;
 
 	Instruction inst ;
 
@@ -22,6 +22,14 @@ public class MA_RW_LatchType {
 
 
 	public int getAluResult(){return aluResult;}
+
+	public void setIsValidInstruction(boolean isValidInstruction){
+		this.setIsValidInstruction = isValidInstruction;
+	}
+
+	public boolean getIsValidInstruction(){
+		return setIsValidInstruction;
+	}
 
 
 	public void setExcess(int excess){this.excess = excess;}

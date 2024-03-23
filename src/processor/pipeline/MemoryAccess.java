@@ -25,7 +25,7 @@ public class MemoryAccess implements Element {
 //			MA_RW_Latch.setInstruction(inst);
 			this.instruction = inst;
 
-			if (!EX_MA_Latch.getIsMA_busy() && !EX_MA_Latch.getIsMA_busy()) {
+			if (!EX_MA_Latch.getIsMA_busy()) {
 
 				if (inst != null) {
 					int aluResult = EX_MA_Latch.getAluResult();
@@ -39,8 +39,6 @@ public class MemoryAccess implements Element {
 							Simulator.getEventQueue()
 									.addEvent(new MemoryReadEvent(Clock.getCurrentTime(), this,
 											containingProcessor.getMainMemory(), aluResult));
-//						int ldResult = containingProcessor.getMainMemory().getWord(aluResult);
-//						MA_RW_Latch.setLdResult(ldResult);
 							EX_MA_Latch.setIsMA_busy(true);
 							break;
 						}
@@ -84,11 +82,12 @@ public class MemoryAccess implements Element {
 						case end: {
 							EX_MA_Latch.setIsMA_busy(false);
 							EX_MA_Latch.setMA_enable(false);
-							// Passing aluResult to Register Writeback stage to store it register
+							EX_MA_Latch.setIsValidInstruction(false);
 							MA_RW_Latch.setInstruction(this.instruction);
 							MA_RW_Latch.setExcess(this.excess);
 							MA_RW_Latch.setAluResult(aluResult);
 							MA_RW_Latch.setRW_enable(true);
+							MA_RW_Latch.setIsValidInstruction(true);
 
 							break;
 						}
@@ -100,11 +99,16 @@ public class MemoryAccess implements Element {
 				// TODO:- DEBUG
 				else {
 					MA_RW_Latch.setInstruction(null);
+					MA_RW_Latch.setIsValidInstruction(true);
+					EX_MA_Latch.setIsValidInstruction(false);
 				}
 
 
 				EX_MA_Latch.setMA_enable(false);
 				MA_RW_Latch.setRW_enable(true);
+			}
+			else{
+				return;
 			}
 		}
 	}
@@ -114,10 +118,12 @@ public class MemoryAccess implements Element {
 		MemoryResponseEvent e = (MemoryResponseEvent) event;
 
 		EX_MA_Latch.setIsMA_busy(false);
+		EX_MA_Latch.setIsValidInstruction(false);
 
 		MA_RW_Latch.setInstruction(this.instruction);
 		MA_RW_Latch.setExcess(this.excess);
 		MA_RW_Latch.setLdResult(e.getValue());
+		MA_RW_Latch.setIsValidInstruction(true);
 
 	}
 }

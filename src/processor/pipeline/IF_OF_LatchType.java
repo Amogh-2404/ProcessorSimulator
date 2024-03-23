@@ -6,7 +6,7 @@ public class IF_OF_LatchType {
 	int instruction ,currentPC;
 
 
-	boolean isNop, isStall, isOF_busy;
+	boolean isNop, isStall, isOF_busy, isValidInstruction;
 	
 	public IF_OF_LatchType()
 	{
@@ -20,6 +20,13 @@ public class IF_OF_LatchType {
 
 	public boolean getOF_busy() {
 		return isOF_busy;
+	}
+
+	public boolean getIsValidInstruction() {
+		return isValidInstruction;
+	}
+	public void setIsValidInstruction(boolean isValidInstruction) {
+		this.isValidInstruction = isValidInstruction;
 	}
 
 	public void setOF_busy(boolean isOF_busy) {

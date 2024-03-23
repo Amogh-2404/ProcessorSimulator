@@ -77,13 +77,24 @@ public class InstructionFetch implements Element {
 			Simulator.getEventQueue().addEvent(event);
 		}
 		// TODO:- Potential spot to add the condition if the instruction in the next latch is a nop
+		else if (IF_OF_Latch.getIsNop()) {
+			containingProcessor.getRegisterFile().setProgramCounter(EX_IF_Latch.getBranchPC());
+
+			IF_EnableLatch.setIF_Busy(false);
+
+			IF_OF_Latch.setIsValidInstruction(false);
+			IF_OF_Latch.setNop(false);
+			IF_OF_Latch.setOF_enable(true);
+
+			EX_IF_Latch.setIsBranchTaken(false);
+		}
 		else{
 			MemoryResponseEvent e = (MemoryResponseEvent) event;
 			IF_OF_Latch.setInstruction(e.getValue());
 			IF_OF_Latch.setOF_enable(true);
 			IF_EnableLatch.setIF_Busy(false);
 
-			IF_OF_Latch.setNop(true);
+			IF_OF_Latch.setInstruction(e.getValue());
 			IF_OF_Latch.setCurrentPC(previousPC);
 		}
 

@@ -11,6 +11,8 @@ public class OperandFetch {
 	Processor containingProcessor;
 	IF_OF_LatchType IF_OF_Latch;
 	OF_EX_LatchType OF_EX_Latch;
+
+
 	
 	public OperandFetch(Processor containingProcessor, IF_OF_LatchType iF_OF_Latch, OF_EX_LatchType oF_EX_Latch)
 	{
@@ -28,10 +30,12 @@ public class OperandFetch {
 
 				if (IF_OF_Latch.getIsNop()) {
 					OF_EX_Latch.setInstruction(null);
+					OF_EX_Latch.setIsValidInstruction(true);
+					IF_OF_Latch.setIsValidInstruction(false);
 					Simulator.incrementNop();
 					InstructionFetch.additionalNop = !InstructionFetch.additionalNop;
 				} else {
-
+				if (IF_OF_Latch.getIsValidInstruction()) {
 					containingProcessor.getDataInterlockUnit().checkConflict();
 
 					if (IF_OF_Latch.getStall()) {
@@ -42,8 +46,11 @@ public class OperandFetch {
 						decodeTheInstruction();
 						IF_OF_Latch.setOF_enable(false);
 						OF_EX_Latch.setEX_enable(true);
+
 					}
 				}
+				}
+
 
 		}
 		else{

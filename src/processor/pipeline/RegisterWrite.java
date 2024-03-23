@@ -21,7 +21,8 @@ public class RegisterWrite {
 
 	public void performRW() {
 		if (MA_RW_Latch.isRW_enable()) {
-			Instruction instructionInRW = MA_RW_Latch.getInstruction();
+			if (MA_RW_Latch.getIsValidInstruction()){
+				Instruction instructionInRW = MA_RW_Latch.getInstruction();
 
 			if (instructionInRW != null) {
 
@@ -90,11 +91,12 @@ public class RegisterWrite {
 						Misc.printErrorAndExit("Unknown Instruction!!");
 				}
 			}
+				Simulator.incNumInst();
+				containingProcessor.getDataInterlockUnit().setFinalInstruction(instructionInRW);
+			}
 
 			MA_RW_Latch.setRW_enable(false);
 			IF_EnableLatch.setIF_enable(true);
-			Simulator.incNumInst();
-			containingProcessor.getDataInterlockUnit().setFinalInstruction(instructionInRW);
 
 		}
 	}
