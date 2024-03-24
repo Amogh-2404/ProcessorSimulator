@@ -23,45 +23,31 @@ public class InstructionFetch implements Element {
 		this.IF_EnableLatch = iF_EnableLatch;
 		this.IF_OF_Latch = iF_OF_Latch;
 		this.EX_IF_Latch = eX_IF_Latch;
+		previousPC = 0;
 	}
 
 	public void performIF() {
 		if (IF_EnableLatch.isIF_enable()) {
 
-			if(!IF_EnableLatch.isIFBusy) {
+			if(!IF_EnableLatch.getisIFBusy()) {
 
 				if (!IF_EnableLatch.isStall()) {
-					if (EX_IF_Latch.getIsBranchTaken() && additionalNop == false) {
+					if (EX_IF_Latch.getIsBranchTaken()) {
 
 						containingProcessor.getRegisterFile()
 								.setProgramCounter(EX_IF_Latch.getBranchPC());
 
 						EX_IF_Latch.setIsBranchTaken(false);
-
-						int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
-
-						Simulator.getEventQueue().addEvent(new MemoryReadEvent(Clock.getCurrentTime(), (Element) this, (Element) containingProcessor.getMainMemory(), currentPC));
-
-						IF_EnableLatch.setIF_Busy(true);
-
-						previousPC = currentPC;
-
-						containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
-
-					} else if (EX_IF_Latch.getIsBranchTaken() && additionalNop == true) {
-						IF_OF_Latch.setNop(true);
-					} else {
-						int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
-						Simulator.getEventQueue().addEvent(new MemoryReadEvent(Clock.getCurrentTime(), (Element) this, (Element) containingProcessor.getMainMemory(), currentPC));
-
-						previousPC = currentPC;
-
-						containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
-
-						IF_EnableLatch.setIF_Busy(true);
 					}
 
+						int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
+						Simulator.getEventQueue().addEvent(new MemoryReadEvent(Clock.getCurrentTime(), this, containingProcessor.getMainMemory(), currentPC));
 
+						previousPC = currentPC;
+
+						containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
+
+						IF_EnableLatch.setIF_Busy(true);
 				}
 
 			}
@@ -93,8 +79,8 @@ public class InstructionFetch implements Element {
 			IF_OF_Latch.setInstruction(e.getValue());
 			IF_OF_Latch.setOF_enable(true);
 			IF_EnableLatch.setIF_Busy(false);
-
-			IF_OF_Latch.setInstruction(e.getValue());
+			IF_OF_Latch.setIsValidInstruction(true);
+			IF_OF_Latch.setNop(false);
 			IF_OF_Latch.setCurrentPC(previousPC);
 		}
 

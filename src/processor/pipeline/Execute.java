@@ -22,8 +22,6 @@ public class Execute implements Element {
 		switch (inst.getOperationType()) {
 			case mul:
 			case muli: {
-				// System.out.println("Scheduling Event...\n"); // TEST
-
 				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
 						Clock.getCurrentTime() + Configuration.multiplier_latency, (Element) this, (Element) this, inst, this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
 				OF_EX_Latch.setEX_busy(true);
@@ -31,8 +29,6 @@ public class Execute implements Element {
 			}
 			case div:
 			case divi: {
-				// System.out.println("Scheduling Event...\n"); // TEST
-
 				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
 						Clock.getCurrentTime() + Configuration.divider_latency, (Element) this, (Element) this, inst,
 						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
@@ -64,10 +60,8 @@ public class Execute implements Element {
 			case bne:
 			case blt:
 			case bgt: {
-				// System.out.println("Scheduling Event...\n"); // TEST
-
 				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
-						Clock.getCurrentTime() + Configuration.ALU_latency, (Element) this, (Element) this, inst,
+						Clock.getCurrentTime() + Configuration.ALU_latency, this, this, inst,
 						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
 				OF_EX_Latch.setEX_busy(true);
 				break;
@@ -75,15 +69,16 @@ public class Execute implements Element {
 
 			case jmp:
 			case end: {
-				// Performing Control-Interlock validation for branch instructions
 				containingProcessor.getControlInterlockUnit().validate();
 
 				OF_EX_Latch.setEX_busy(false);
+				OF_EX_Latch.setIsValidInstruction(false);
 				OF_EX_Latch.setEX_enable(false);
 
 
 				EX_MA_Latch.setInstruction(inst);
 				EX_MA_Latch.setMA_enable(true);
+				EX_MA_Latch.setIsValidInstruction(true);
 				break;
 			}
 
@@ -100,34 +95,36 @@ public class Execute implements Element {
 		this.EX_IF_Latch = eX_IF_Latch;
 	}
 	
-	public void performEX()
-	{
+	public void performEX() {
 		if (OF_EX_Latch.isEX_enable()) {
 
 			if (!OF_EX_Latch.isEX_busy) {
-				OF_EX_Latch.setEX_busy(true);
-				Instruction inst = OF_EX_Latch.getInstruction();
-				EX_MA_Latch.setInstruction(inst);
+				if (!EX_MA_Latch.getIsMA_busy()) {
+					OF_EX_Latch.setEX_MA_busy(false);
+					if (OF_EX_Latch.getIsValidInstruction()) {
+						Instruction inst = OF_EX_Latch.getInstruction();
+						EX_MA_Latch.setInstruction(inst);
 
-				if (inst != null) {
-					compute(inst);
-					scheduleEvent(inst);
-					containingProcessor.getControlInterlockUnit().validate();
-					OF_EX_Latch.setIsValidInstruction(false);
+						if (inst != null) {
+							compute(inst);
+							scheduleEvent(inst);
+							containingProcessor.getControlInterlockUnit().validate();
+							OF_EX_Latch.setIsValidInstruction(false);
+						} else {
+							EX_MA_Latch.setInstruction(null);
+
+							EX_IF_Latch.setIsBranchTaken(false);
+
+							OF_EX_Latch.setIsValidInstruction(false);
+
+							EX_MA_Latch.setIsValidInstruction(true);
+						}
+					}
 				} else {
-					EX_MA_Latch.setInstruction(null);
-
-					EX_IF_Latch.setIsBranchTaken(false);
-
-					OF_EX_Latch.setIsValidInstruction(false);
-
-					EX_MA_Latch.setIsValidInstruction(true);
+					OF_EX_Latch.setEX_MA_busy(false);
 				}
-			}
-			else{
-				OF_EX_Latch.setEX_busy(false);
-			}
 
+			}
 			OF_EX_Latch.setEX_enable(false);
 			EX_MA_Latch.setMA_enable(true);
 		}
@@ -337,9 +334,7 @@ public class Execute implements Element {
 
 	@Override
 	public void handleEvent(Event event) {
-		if (EX_MA_Latch.isMA_enable()) { // If MA stage is busy
-			// System.out.println("Event postponed | MA Busy"); // TEST
-
+		if (EX_MA_Latch.getIsMA_busy()) {
 			event.setEventTime(Clock.getCurrentTime() + 1);
 			Simulator.getEventQueue().addEvent(event);
 		} else {
@@ -348,6 +343,7 @@ public class Execute implements Element {
 			// System.out.println("Event Triggered in EX: \n" + event); // TEST
 
 			OF_EX_Latch.setEX_busy(false);
+			OF_EX_Latch.setIsValidInstruction(false);
 
 			OF_EX_Latch.setEX_enable(false);
 
@@ -356,9 +352,11 @@ public class Execute implements Element {
 
 			EX_MA_Latch.setMA_enable(true);
 			EX_MA_Latch.setInstruction(e.getInst());
+
 			EX_MA_Latch.setAluResult(e.getAluResult());
 			EX_MA_Latch.setExcess(e.getExcess());
 			EX_MA_Latch.setOperand(e.getOp());
+			EX_MA_Latch.setIsValidInstruction(true);
 
 			// Performing Control-Interlock validation for branch instructions
 			containingProcessor.getControlInterlockUnit().validate();

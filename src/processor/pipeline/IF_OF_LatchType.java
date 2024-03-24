@@ -10,6 +10,8 @@ public class IF_OF_LatchType {
 	
 	public IF_OF_LatchType()
 	{
+		isOF_busy = false;
+		isValidInstruction = false;
 		OF_enable = false;
 		isNop = false;
 	}

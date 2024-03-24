@@ -47,9 +47,7 @@ public class MainMemory implements Element {
 					(Element) event.getRequestingElement(),
 					getWord(event.getAddressToReadFrom())
 			));
-		}
-
-		if (e.getEventType() == Event.EventType.MemoryWrite){
+		}else if (e.getEventType() == Event.EventType.MemoryWrite){
 			MemoryWriteEvent event = (MemoryWriteEvent) e;
 			setWord(event.getAddressToWriteTo(), event.getValue());
 			Simulator.getEventQueue().addEvent(new MemoryResponseEvent(

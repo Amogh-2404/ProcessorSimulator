@@ -30,12 +30,14 @@ public class Processor {
 	
 	InstructionFetch IFUnit;
 	OperandFetch OFUnit;
+
+	DataInterlock DataInterlockUnit;
+	ControlInterlock ControlInterlockUnit;
 	Execute EXUnit;
 	MemoryAccess MAUnit;
 	RegisterWrite RWUnit;
 
-	DataInterlock DataInterlockUnit; // The Data-Interlock unit of the processor
-	ControlInterlock ControlInterlockUnit; // The Control-Interlock unit of the processor
+
 	
 	public Processor()
 	{

@@ -4,17 +4,21 @@ import generic.Instruction;
 
 public class OF_EX_LatchType {
 	
-	boolean EX_enable, isEX_busy = false, isEX_MA_busy = false, isValidInstruction;  //TODO:- Redundant EX_MA ?
+	boolean EX_enable, isEX_busy = false, isEX_MA_busy = false, isValidInstruction=false;
 
 	Instruction inst;
 
 	int operand1 = 0, operand2 = 0, immediate=0, branchTarget;
 
-	boolean isImmediate = false;
+	boolean isImmediate ;
 	
 	public OF_EX_LatchType()
 	{
 		EX_enable = false;
+		inst = null;
+		branchTarget = 0;
+		isImmediate = false;
+
 	}
 
 	public boolean getEX_busy(){
@@ -60,4 +64,11 @@ public class OF_EX_LatchType {
 
 	public void setIsImmediate(boolean isImm){isImmediate = isImm;}
 
+    public void setEX_MA_busy(boolean b) {
+		isEX_MA_busy = b;
+    }
+
+	public boolean getEX_MA_busy() {
+		return isEX_MA_busy;
+	}
 }

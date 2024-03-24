@@ -25,7 +25,7 @@ public class OperandFetch {
 	{
 		if (IF_OF_Latch.isOF_enable()) {
 
-			if (!OF_EX_Latch.isEX_busy){ // TODO:- Check if one more condition is needed or not
+			if ( !OF_EX_Latch.getEX_MA_busy() && !OF_EX_Latch.getEX_busy()){ // TODO:- Check if one more condition is needed or not
 				IF_OF_Latch.setOF_busy(false);
 
 				if (IF_OF_Latch.getIsNop()) {
@@ -40,12 +40,13 @@ public class OperandFetch {
 
 					if (IF_OF_Latch.getStall()) {
 						OF_EX_Latch.setInstruction(null);
+						OF_EX_Latch.setIsValidInstruction(true);
 						Simulator.incNumDataHazards();
 
 					} else {
 						decodeTheInstruction();
-						IF_OF_Latch.setOF_enable(false);
-						OF_EX_Latch.setEX_enable(true);
+						IF_OF_Latch.setIsValidInstruction(false);
+						OF_EX_Latch.setIsValidInstruction(true);
 
 					}
 				}
@@ -126,7 +127,6 @@ public class OperandFetch {
 				newIns.setDestinationOperand(getRegisterOperand(inst.substring(10, 15)));
 
 				newIns.setSourceOperand2(getImmediateOperand(inst.substring(15, 32)));
-
 
 				OF_EX_Latch.setOperand1(containingProcessor.getRegisterFile()
 						.getValue(newIns.getSourceOperand1().getValue()));
@@ -210,11 +210,12 @@ public class OperandFetch {
 			}
 
 			case end:
-				containingProcessor.getRegisterFile().setProgramCounter(IF_OF_Latch.getCurrentPC());
+				containingProcessor.getRegisterFile().setProgramCounter(IF_OF_Latch.getCurrentPC()); //TODO:- Check if this is needed or not
 				break;
 
+
 			default:
-				Misc.printErrorAndExit("Unknown Instruction!!");
+				Misc.printErrorAndExit("Instruction not present in the switch case.");
 		}
 
 

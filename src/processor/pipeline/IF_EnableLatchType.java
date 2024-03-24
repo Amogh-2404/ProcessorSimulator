@@ -9,9 +9,10 @@ public class IF_EnableLatchType {
 
 	public IF_EnableLatchType()
 	{
-		IF_enable = true;
 		isStall = false;
 		isIFBusy = false;
+		IF_enable = true;
+
 	}
 
 	public boolean isIF_enable() {
@@ -37,5 +38,9 @@ public class IF_EnableLatchType {
 
 	public void setIF_Busy(boolean b) {
 		isIFBusy = b;
+	}
+
+	public boolean getisIFBusy() {
+		return isIFBusy;
 	}
 }

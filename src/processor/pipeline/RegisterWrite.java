@@ -24,6 +24,8 @@ public class RegisterWrite {
 			if (MA_RW_Latch.getIsValidInstruction()){
 				Instruction instructionInRW = MA_RW_Latch.getInstruction();
 
+				MA_RW_Latch.setIsValidInstruction(false);
+
 			if (instructionInRW != null) {
 
 				int ldResult = MA_RW_Latch.getLdResult(); // Load result
