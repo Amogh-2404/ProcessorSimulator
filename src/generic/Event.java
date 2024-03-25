@@ -1,16 +1,18 @@
 package generic;
 
 public class Event {
-	
-	public enum EventType {ExecutionComplete, MemoryRead, MemoryResponse, MemoryWrite};
-	
+
+	public enum EventType {
+		ExecutionComplete, MemoryRead, MemoryResponse, MemoryWrite, StoreEvent
+	};
+
 	long eventTime;
 	Element requestingElement;
 	Element processingElement;
 	EventType eventType;
-	
-	public Event(long eventTime, EventType eventType, Element requestingElement, Element processingElement)
-	{
+
+	public Event(long eventTime, EventType eventType, Element requestingElement,
+			Element processingElement) {
 		this.eventTime = eventTime;
 		this.eventType = eventType;
 		this.requestingElement = requestingElement;

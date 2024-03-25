@@ -2,14 +2,12 @@ package processor;
 
 public class Clock {
 	static long currentTime = 0;
-	
-	public static void incrementClock()
-	{
+
+	public static void incrementClock() {
 		currentTime++;
 	}
-	
-	public static long getCurrentTime()
-	{
+
+	public static long getCurrentTime() {
 		return currentTime;
 	}
 }

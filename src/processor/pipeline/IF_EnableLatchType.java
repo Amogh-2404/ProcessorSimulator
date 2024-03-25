@@ -1,46 +1,40 @@
 package processor.pipeline;
 
 public class IF_EnableLatchType {
-	
-	boolean IF_enable;
-	boolean isStall; // whether IF stage is stalling or not
 
-	boolean isIFBusy;
+	boolean IF_Stage_enable, isIFStall, isIFstageBusy;
 
-	public IF_EnableLatchType()
-	{
-		isStall = false;
-		isIFBusy = false;
-		IF_enable = true;
 
+	public boolean getIsIFStageStall() {
+		return this.isIFStall;
 	}
 
-	public boolean isIF_enable() {
-		return IF_enable;
+	public void setIFstageBusy(boolean bool) {
+		this.isIFstageBusy = bool;
 	}
 
-	public void setIF_busy(boolean arg){
-		 isIFBusy = arg;
+	public boolean isIFstageBusy() {
+		return isIFstageBusy;
 	}
-
-	public void setIF_enable(boolean iF_enable) {
-		IF_enable = iF_enable;
-	}
-
-	public void setStall(boolean isStall) {
-		this.isStall = isStall;
-	}
-
-	public boolean isStall() {
-		return this.isStall;
+	public IF_EnableLatchType() {
+		isIFStall = false;
+		isIFstageBusy = false;
+		IF_Stage_enable = true;
 	}
 
 
-	public void setIF_Busy(boolean b) {
-		isIFBusy = b;
+	public void setIsIFStagestall(boolean bool) {
+		this.isIFStall = bool;
 	}
 
-	public boolean getisIFBusy() {
-		return isIFBusy;
+
+	public boolean isIF_Stage_enable() {
+		return IF_Stage_enable;
 	}
+
+	public void setIF_Stage_enable(boolean bool) {
+		IF_Stage_enable = bool;
+	}
+
+
 }

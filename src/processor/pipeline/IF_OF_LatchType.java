@@ -1,71 +1,78 @@
 package processor.pipeline;
 
 public class IF_OF_LatchType {
-	
-	boolean OF_enable;
-	int instruction ,currentPC;
+
+	boolean OF_stage_enable, isNopInstruction, isStall, isOFStageBusy, isValidInstruction;; ;
+	int instruction, currentPC;
 
 
-	boolean isNop, isStall, isOF_busy, isValidInstruction;
-	
-	public IF_OF_LatchType()
-	{
-		isOF_busy = false;
-		isValidInstruction = false;
-		OF_enable = false;
-		isNop = false;
+	public void setCurrentPC(int pc) {
+		currentPC = pc;
 	}
 
-	public boolean isOF_enable() {
-		return OF_enable;
+	public void setNopInstruction(boolean bool) {
+		this.isNopInstruction = bool;
 	}
 
-	public boolean getOF_busy() {
-		return isOF_busy;
-	}
-
-	public boolean getIsValidInstruction() {
-		return isValidInstruction;
-	}
-	public void setIsValidInstruction(boolean isValidInstruction) {
-		this.isValidInstruction = isValidInstruction;
-	}
-
-	public void setOF_busy(boolean isOF_busy) {
-		this.isOF_busy = isOF_busy;
-	}
-
-
-	public void setOF_enable(boolean oF_enable) {
-		OF_enable = oF_enable;
+	public void setOF_stage_enable(boolean bool) {
+		OF_stage_enable = bool;
 	}
 
 	public int getInstruction() {
 		return instruction;
 	}
 
+
+	public IF_OF_LatchType() {
+		isStall = false;
+		isOFStageBusy = false;
+		isValidInstruction = false;
+		OF_stage_enable = false;
+		isNopInstruction = false;
+	}
+
+	public boolean isOF_stage_enable() {
+		return OF_stage_enable;
+	}
+
 	public void setInstruction(int instruction) {
 		this.instruction = instruction;
 	}
 
-	public int getCurrentPC(){return currentPC;}
-
-	public void setCurrentPC(int currPC){ currentPC = currPC;}
-
-	public void setNop(boolean isNop) {
-		this.isNop = isNop;
+	
+	
+	public int getCurrentPC() {
+		return currentPC;
 	}
 
-	public boolean getIsNop() {
-		return this.isNop;
+
+	public void setOFStageBusy(boolean bool) {
+		this.isOFStageBusy = bool;
 	}
 
-	public void setStall(boolean isStall) {
-		this.isStall = isStall;
+	public boolean isOFStageBusy() {
+		return isOFStageBusy;
+	}
+
+
+	public boolean getNopInstruction() {
+		return this.isNopInstruction;
+	}
+
+	public void setStall(boolean bool) {
+		this.isStall = bool;
 	}
 
 	public boolean getStall() {
 		return this.isStall;
+	}
+
+	public void setValidInstruction(boolean bool) {
+		this.isValidInstruction = bool;
+	}
+
+	public boolean isValidInstruction() {
+		return isValidInstruction;
 	}
 
 }

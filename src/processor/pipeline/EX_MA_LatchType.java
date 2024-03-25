@@ -3,75 +3,74 @@ package processor.pipeline;
 import generic.Instruction;
 
 public class EX_MA_LatchType {
-	
-	boolean MA_enable, isMA_busy, isValidInstruction;
 
-	Instruction inst;
+	Boolean MA_enable;
+	Instruction instruction;
 
-	int aluResult, excess, op;
-	// Excess bits to store in x31 register
 
-	public EX_MA_LatchType()
-	{
-		inst = null;
-		MA_enable = false;
-		aluResult=op=excess = 0 ;
-		isValidInstruction = false;
-	}
-
-	public boolean isMA_enable() {
+	Boolean isMABusy, isValidInst;
+	public Boolean isMAstageEnabled() {
 		return MA_enable;
 	}
 
-	public boolean getIsValidInstruction(){
-		return isValidInstruction;
+	public void setMAstageEnabled(boolean bool) {
+		MA_enable = bool;
 	}
 
-	public void setIsValidInstruction(boolean isValidInstruction){
-		this.isValidInstruction = isValidInstruction;
+	Integer aluResult, excess, op;
+	public Instruction getInstruction() {
+		return instruction;
 	}
 
-	public boolean getIsMA_busy(){
-		return isMA_busy;
-	}
-	public void setIsMA_busy(boolean isMA_busy){
-		this.isMA_busy = isMA_busy;
+	public EX_MA_LatchType() {
+		MA_enable = false;
+		instruction = null;
+		aluResult = op = excess = 0;
+		isMABusy = isValidInst = false;
 	}
 
-	public void setInstruction(Instruction newIns){inst = newIns;}
+	public void setInstruction(Instruction instruction) {
+		this.instruction = instruction;
+	}
 
-	public int getAluResult() {
+	public int getAluRes() {
 		return aluResult;
 	}
 
-	public void setAluResult(int result) {
+	public void setAluRes(Integer result) {
 		aluResult = result;
 	}
-
-	public void setMA_enable(boolean mA_enable) {
-		MA_enable = mA_enable;
-	}
-
-	public Instruction getInstruction(){return inst;}
-
-
-	public void setExcess(int exc) {
-		excess = exc;
-	}
-
-	public int getOperand() {
-		return op;
-	}
-
-	public void setOperand(int operand) {
-		op = operand;
-	}
-
-
 
 	public int getExcess() {
 		return excess;
 	}
 
+	public void setExcess(Integer value) {
+		excess = value;
+	}
+
+	public Integer getOperand() {
+		return op;
+	}
+
+	public void setOperand(Integer operand) {
+		op = operand;
+	}
+
+	public Boolean isMAStageBusy() {
+		return isMABusy;
+	}
+
+	public void setMAStageBusy(Boolean isMABusy) {
+		this.isMABusy = isMABusy;
+	}
+
+	public void setValidInstruction(Boolean bool) {
+		this.isValidInst = bool;
+	}
+
+	public Boolean isValidInst() {
+		return isValidInst;
+	}
 
 }

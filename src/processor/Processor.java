@@ -1,7 +1,5 @@
 package processor;
 
-import processor.interlocks.ControlInterlock;
-import processor.interlocks.DataInterlock;
 import processor.memorysystem.MainMemory;
 import processor.pipeline.EX_IF_LatchType;
 import processor.pipeline.EX_MA_LatchType;
@@ -16,57 +14,59 @@ import processor.pipeline.OperandFetch;
 import processor.pipeline.RegisterFile;
 import processor.pipeline.RegisterWrite;
 
+
+import processor.interlocks.DataInterlock;
+import processor.interlocks.ControlInterlock;
+
 public class Processor {
-	
+
 	RegisterFile registerFile;
 	MainMemory mainMemory;
-	
+
 	IF_EnableLatchType IF_EnableLatch;
 	IF_OF_LatchType IF_OF_Latch;
 	OF_EX_LatchType OF_EX_Latch;
 	EX_MA_LatchType EX_MA_Latch;
 	EX_IF_LatchType EX_IF_Latch;
 	MA_RW_LatchType MA_RW_Latch;
-	
+
 	InstructionFetch IFUnit;
 	OperandFetch OFUnit;
-
-	DataInterlock DataInterlockUnit;
-	ControlInterlock ControlInterlockUnit;
 	Execute EXUnit;
 	MemoryAccess MAUnit;
 	RegisterWrite RWUnit;
 
+	DataInterlock DataInterlockUnit; 
+	ControlInterlock ControlInterlockUnit; 
 
-	
-	public Processor()
-	{
+	public Processor() {
 		registerFile = new RegisterFile();
 		mainMemory = new MainMemory();
-		
+
 		IF_EnableLatch = new IF_EnableLatchType();
 		IF_OF_Latch = new IF_OF_LatchType();
 		OF_EX_Latch = new OF_EX_LatchType();
 		EX_MA_Latch = new EX_MA_LatchType();
 		EX_IF_Latch = new EX_IF_LatchType();
 		MA_RW_Latch = new MA_RW_LatchType();
-		
+
 		IFUnit = new InstructionFetch(this, IF_EnableLatch, IF_OF_Latch, EX_IF_Latch);
 		OFUnit = new OperandFetch(this, IF_OF_Latch, OF_EX_Latch);
 		EXUnit = new Execute(this, OF_EX_Latch, EX_MA_Latch, EX_IF_Latch);
 		MAUnit = new MemoryAccess(this, EX_MA_Latch, MA_RW_Latch);
 		RWUnit = new RegisterWrite(this, MA_RW_Latch, IF_EnableLatch);
 
+		
 		DataInterlockUnit =
 				new DataInterlock(this, IF_EnableLatch, IF_OF_Latch, EX_MA_Latch, MA_RW_Latch,OF_EX_Latch);
 		ControlInterlockUnit = new ControlInterlock(IF_OF_Latch, EX_IF_Latch);
 	}
-	
-	public void printState(int memoryStartingAddress, int memoryEndingAddress)
-	{
+
+	public void printState(int memoryStartingAddress, int memoryEndingAddress) {
 		System.out.println(registerFile.getContentsAsString());
-		
-		System.out.println(mainMemory.getContentsAsString(memoryStartingAddress, memoryEndingAddress));		
+
+		System.out.println(
+				mainMemory.getContentsAsString(memoryStartingAddress, memoryEndingAddress));
 	}
 
 	public RegisterFile getRegisterFile() {
@@ -105,6 +105,7 @@ public class Processor {
 		return RWUnit;
 	}
 
+	
 	public DataInterlock getDataInterlockUnit() {
 		return DataInterlockUnit;
 	}
@@ -120,4 +121,5 @@ public class Processor {
 	public void setControlInterlockUnit(ControlInterlock controlInterlockUnit) {
 		ControlInterlockUnit = controlInterlockUnit;
 	}
+
 }

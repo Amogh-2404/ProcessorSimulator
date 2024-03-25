@@ -3,10 +3,15 @@ package generic;
 import processor.Clock;
 import processor.Processor;
 
-import java.io.*;
+// Importing libraries for Input Output operations
+import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.FileNotFoundException;
+import java.io.EOFException;
+import java.io.IOException;
 
 public class Simulator {
-		
+
 	static Processor processor;
 	static boolean simulationComplete;
 
@@ -15,110 +20,121 @@ public class Simulator {
 								// hazard
 	static int numNop; // Number of times an instruction on a wrong branch path entered the pipeline
 
-	static EventQueue eventQueue = new EventQueue();
-	
-	public static void setupSimulation(String assemblyProgramFile, Processor p)
-	{
+	static EventQueue eventQueue;
+
+	public static void setupSimulation(String assemblyProgramFile, Processor p) {
 		Simulator.processor = p;
 		loadProgram(assemblyProgramFile);
-		
+
 		simulationComplete = false;
 
 		numInst = numDataHazards = numNop = 0; // Initializing them to all 0's
+
+		eventQueue = new EventQueue();
 	}
-	
-	static void loadProgram(String assemblyProgramFile)
-	{
-		/*
-		 *
-		 * 1. load the program into memory according to the program layout described
-		 *    in the ISA specification
-		 * 2. set PC to the address of the first instruction in the main
-		 * 3. set the following registers:
-		 *     x0 = 0
-		 *     x1 = 65535
-		 *     x2 = 65535
-		 */
-		try{
-			FileInputStream fileInputStream = new FileInputStream(assemblyProgramFile);
-			DataInputStream dataInputStream = new DataInputStream(fileInputStream);
-			try{
-				try{
-					int pc = -1, address = 0;
-					while (dataInputStream.available()>0){
-						int number = dataInputStream.readInt();
-						if (pc==-1){
-							pc = number;
+
+	static void loadProgram(String assemblyProgramFile) {
+
+		try {
+			FileInputStream fis = new FileInputStream(assemblyProgramFile); // Input file provided
+			DataInputStream dis = new DataInputStream(fis); // DIS object for reading binary numbers
+			try {
+				try {
+					int pc = -1, address = 0; // Program counter and current address
+					while (dis.available() > 0) { // While we can read from the file
+						int num = dis.readInt(); // Reading 4 byte number
+						if (pc == -1) { // The first integer is Header which is main function
+										// address which is initial pc
+							pc = num; // setting pc to num
+							// Setting pc in processor
 							Simulator.processor.getRegisterFile().setProgramCounter(pc);
-						}
-						else{
-							Simulator.processor.getMainMemory().setWord(address, number);
-							++address;
+						} else {
+							// Rest of the integers will be stored in memory
+							Simulator.processor.getMainMemory().setWord(address, num);
+							++address; // Incrementing the address
 						}
 					}
+				} catch (EOFException e) {
 				}
-				catch (EOFException ignored){}
-				dataInputStream.close();
-			}
-			catch (IOException e){
+				dis.close(); // Closing the dis file object
+			} catch (IOException e) {
 				Misc.printErrorAndExit(e.toString());
 			}
-		}
-		catch (FileNotFoundException e){
+		} catch (FileNotFoundException e) {
 			Misc.printErrorAndExit(e.toString());
 		}
 
-
-		Simulator.processor.getRegisterFile().setValue(0,0);
-		Simulator.processor.getRegisterFile().setValue(1,65535);
-		Simulator.processor.getRegisterFile().setValue(2,65535);
-
+		Simulator.processor.getRegisterFile().setValue(0, 0); // Setting x0 = 0
+		Simulator.processor.getRegisterFile().setValue(1, 65535); // Setting x1 = 65535
+		Simulator.processor.getRegisterFile().setValue(2, 65535); // Setting x2 = 65535
 	}
-	
-	public static void simulate()
-	{
-		int numberOfInstructions = 0;
-//		System.out.println(processor.getMainMemory().getContentsAsString(65530, 65535));
-		while(simulationComplete==false)
-		{
-			processor.getRWUnit().performRW();
-			processor.getMAUnit().performMA();
-			processor.getEXUnit().performEX();
+
+	public static void simulate() {
+
+		while (simulationComplete == false) { // while simulation doesn't complete
+			// System.out.println("====================== Clock: " + Clock.getCurrentTime()
+			// + " ==================="); // TEST
+
+			processor.getRWUnit().performRW(); // Register Write Stage
+
+			// System.out.println("======================\n"); // TEST
+
+			processor.getMAUnit().performMA(); // Memory Access Stage
+
+			// System.out.println("======================\n"); // TEST
+
+			processor.getEXUnit().performEX(); // Execution Stage
+
+			// System.out.println("======================\n"); // TEST
+
 			eventQueue.processEvents();
-			processor.getOFUnit().performOF();
-			processor.getIFUnit().performIF();
-			Clock.incrementClock();
+
+			// System.out.println("======================\n"); // TEST
+
+			processor.getOFUnit().performOF(); // Operand Fetch Stage
+
+			// System.out.println("======================\n"); // TEST
+
+			processor.getIFUnit().performIF(); // Instruction Fetch Stage
+
+			Clock.incrementClock(); // Incrementing Clock
 
 		}
-		
 
 		// set statistics
-		Statistics.setNumberOfCycles((int)Clock.getCurrentTime());
+		// The current clock time will be the number of cycles occur
+		Statistics.setNumberOfCycles((int) Clock.getCurrentTime());
+
+		// Setting the number of instructions
 		Statistics.setNumberOfInstructions(numInst);
+
+		// Setting the number of times the OF stage needed to stall because of a data hazard
 		Statistics.setNumberOfDataHazards(numDataHazards);
+
+		// Setting the number of times an instruction on a wrong branch path entered the pipeline
 		Statistics.setNumberOfNop(numNop);
-
 	}
 
-	public static EventQueue getEventQueue()
-	{
-		return eventQueue;
-	}
-	
-	public static void setSimulationComplete(boolean value)
-	{
+	public static void setSimulationComplete(boolean value) {
 		simulationComplete = value;
 	}
 
-	public static void incNumInst(){
+	// Function to increment the numInst by 1
+	public static void incNumInst() {
 		++numInst;
 	}
 
-	public static void incNumDataHazards(){
+	// Function to increment numDataHazards by 1
+	public static void incNumDataHazards() {
 		++numDataHazards;
 	}
 
-	public static void incrementNop(){
+	// Function to increment numNop by 1
+	public static void incNop() {
 		++numNop;
+	}
+
+	public static EventQueue getEventQueue() {
+		return eventQueue;
 	}
 }

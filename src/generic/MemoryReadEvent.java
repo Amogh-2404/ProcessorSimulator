@@ -3,8 +3,9 @@ package generic;
 public class MemoryReadEvent extends Event {
 
 	int addressToReadFrom;
-	
-	public MemoryReadEvent(long eventTime, Element requestingElement, Element processingElement, int address) {
+
+	public MemoryReadEvent(long eventTime, Element requestingElement, Element processingElement,
+			int address) {
 		super(eventTime, EventType.MemoryRead, requestingElement, processingElement);
 		this.addressToReadFrom = address;
 	}
