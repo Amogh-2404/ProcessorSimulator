@@ -2,29 +2,33 @@ package processor.pipeline;
 
 public class EX_IF_LatchType {
 
-	int branchPC;
+	Integer branchPC = 0;
 
 
 	public EX_IF_LatchType() {
-		isBranchTaken = false;
 		branchPC = 0;
+		isBranchTaken = false;
 	}
-
-	public boolean getIsBranchTaken() {
-		return isBranchTaken;
-	}
-
 	public void setIsBranchTaken(boolean isBranchTaken) {
 		this.isBranchTaken = isBranchTaken;
 	}
 
-	boolean isBranchTaken;
+	Boolean isBranchTaken = false;
 	public int getBranchPC() {
 		return branchPC;
+
 	}
+
+	public boolean getIsBranchTaken() {
+		return isBranchTaken;
+
+	}
+
+
 
 	public void setBranchPC(int branchPC) {
 		this.branchPC = branchPC;
+
 	}
 
 }

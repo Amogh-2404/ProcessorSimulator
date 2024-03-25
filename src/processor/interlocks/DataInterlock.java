@@ -14,7 +14,7 @@ import generic.Operand;
 
 public class DataInterlock {
 
-   
+
     Processor containingProcessor;
     IF_EnableLatchType IF_EnableLatch;
     IF_OF_LatchType IF_OF_Latch;
@@ -32,9 +32,9 @@ public class DataInterlock {
     public void setFinalInstruction(Instruction finalInstruction) {
         this.finalInstruction = finalInstruction;
     }
-    
+
     public DataInterlock(Processor containingProcessor, IF_EnableLatchType IF_EnableLatch,
-            IF_OF_LatchType IF_OF_Latch, EX_MA_LatchType EX_MA_Latch, MA_RW_LatchType MA_RW_Latch,OF_EX_LatchType OF_EX_Latch) {
+                         IF_OF_LatchType IF_OF_Latch, EX_MA_LatchType EX_MA_Latch, MA_RW_LatchType MA_RW_Latch, OF_EX_LatchType OF_EX_Latch) {
         this.containingProcessor = containingProcessor;
         this.IF_EnableLatch = IF_EnableLatch;
         this.IF_OF_Latch = IF_OF_Latch;
@@ -43,7 +43,7 @@ public class DataInterlock {
         this.OF_EX_Latch = OF_EX_Latch;
     }
 
-   
+
     public void checkConflict() {
 
         Instruction currentInstruction = getInstruction();
@@ -52,30 +52,29 @@ public class DataInterlock {
         Instruction instructionInMA = EX_MA_Latch.getInstruction();
         Instruction instructionInRW = MA_RW_Latch.getInstruction();
 
-        
+
         if ((EX_MA_Latch.isValidInst() && instructionInMA != null && hasConflict(currentInstruction, instructionInMA))
                 || (MA_RW_Latch.isValidInstruction() && instructionInRW != null && hasConflict(currentInstruction, instructionInRW))
                 || (OF_EX_Latch.isValidInstruction() && instructionInEX != null && hasConflict(currentInstruction, instructionInEX))
-        ||(hasConflict(currentInstruction, finalInstruction))){
+                || (hasConflict(currentInstruction, finalInstruction))) {
 
             IF_EnableLatch.setIsIFStagestall(true);
             IF_OF_Latch.setStall(true);
 
-        } else { 
+        } else {
             IF_EnableLatch.setIsIFStagestall(false);
             IF_OF_Latch.setStall(false);
         }
     }
 
-    
-    
+
     private boolean hasConflict(Instruction A, Instruction B) {
-       
+
         if (A == null || B == null) {
             return false;
         }
 
-       
+
         switch (A.getOperationType()) {
             case jmp:
             case end:
@@ -96,13 +95,12 @@ public class DataInterlock {
             isSecondImmediate = false;
         }
 
-        
-        
+
         if (sourceRegister1A == 31 || sourceRegister2A_copy == 31) {
             return true;
         }
 
-        
+
         switch (B.getOperationType()) {
             case jmp:
             case end:
@@ -113,7 +111,7 @@ public class DataInterlock {
         int sourceRegister2B = B.getSourceOperand2().getValue();
         int destinationRegisterB = B.getDestinationOperand().getValue();
 
-        
+
         switch (B.getOperationType()) {
             case bne:
             case blt:
@@ -123,8 +121,7 @@ public class DataInterlock {
             default:
         }
 
-        
-        
+
         if (A.getOperationType() == OperationType.valueOf("load")
                 && B.getOperationType() == OperationType.valueOf("store")) {
             int address1 = containingProcessor.getRegisterFile().getValue(sourceRegister1A) + sourceRegister2A;
@@ -134,12 +131,12 @@ public class DataInterlock {
             }
         }
 
-        
+
         if (B.getOperationType() == OperationType.valueOf("store")) {
             return false;
         }
 
-        
+
         if (sourceRegister1A == destinationRegisterB || (!isSecondImmediate && sourceRegister2A_copy == destinationRegisterB)) {
             return true;
         }
@@ -148,95 +145,65 @@ public class DataInterlock {
     }
 
     private Instruction getInstruction() {
-        
+
         String instruction = addPaddingToStart(Integer.toBinaryString(IF_OF_Latch.getInstruction()), 32);
 
         Instruction newInstruction = new Instruction();
 
-        
+
         newInstruction.setOperationType(
                 OperationType.values()[binaryToDecimal(instruction.substring(0, 5), false)]);
 
-        
-        switch (newInstruction.getOperationType()) {
-            
-            case add:
-            case sub:
-            case mul:
-            case div:
-            case and:
-            case or:
-            case xor:
-            case slt:
-            case sll:
-            case srl:
-            case sra: {
-                
-                newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
-                
-                newInstruction.setSourceOperand2(getRegisterOperand(instruction.substring(10, 15)));
-                
-                newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(15, 20)));
-                break;
+
+        OperationType operationType = newInstruction.getOperationType();
+
+        if (operationType == OperationType.add || operationType == OperationType.sub ||
+                operationType == OperationType.mul || operationType == OperationType.div ||
+                operationType == OperationType.and || operationType == OperationType.or ||
+                operationType == OperationType.xor || operationType == OperationType.slt ||
+                operationType == OperationType.sll || operationType == OperationType.srl ||
+                operationType == OperationType.sra) {
+
+            newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
+            newInstruction.setSourceOperand2(getRegisterOperand(instruction.substring(10, 15)));
+            newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(15, 20)));
+
+        } else if (operationType == OperationType.addi || operationType == OperationType.subi ||
+                operationType == OperationType.muli || operationType == OperationType.divi ||
+                operationType == OperationType.andi || operationType == OperationType.ori ||
+                operationType == OperationType.xori || operationType == OperationType.slti ||
+                operationType == OperationType.slli || operationType == OperationType.srli ||
+                operationType == OperationType.srai || operationType == OperationType.load ||
+                operationType == OperationType.store) {
+
+            newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
+            newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(10, 15)));
+            newInstruction.setSourceOperand2(getImmediateOperand(instruction.substring(15, 32)));
+
+        } else if (operationType == OperationType.beq || operationType == OperationType.bne ||
+                operationType == OperationType.blt || operationType == OperationType.bgt) {
+
+            newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
+            newInstruction.setSourceOperand2(getRegisterOperand(instruction.substring(10, 15)));
+            newInstruction.setDestinationOperand(getImmediateOperand(instruction.substring(15, 32)));
+
+        } else if (operationType == OperationType.jmp) {
+            if (binaryToDecimal(instruction.substring(5, 10), false) != 0) {
+                newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(5, 10)));
+            } else {
+                newInstruction.setDestinationOperand(getImmediateOperand(instruction.substring(10, 32)));
             }
 
-            
-            case addi:
-            case subi:
-            case muli:
-            case divi:
-            case andi:
-            case ori:
-            case xori:
-            case slti:
-            case slli:
-            case srli:
-            case srai:
-            case load:
-            case store: {
-                
-                newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
-                
-                newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(10, 15)));
-                
-                newInstruction.setSourceOperand2(getImmediateOperand(instruction.substring(15, 32)));
-                break;
-            }
+        } else if (operationType == OperationType.end) {
+            // No operation for 'end'
 
-            case beq:
-            case bne:
-            case blt:
-            case bgt: {
-                
-                newInstruction.setSourceOperand1(getRegisterOperand(instruction.substring(5, 10)));
-                
-                newInstruction.setSourceOperand2(getRegisterOperand(instruction.substring(10, 15)));
-                
-                newInstruction.setDestinationOperand(getImmediateOperand(instruction.substring(15, 32)));
-                break;
-            }
-
-            
-            case jmp: {
-                if (binaryToDecimal(instruction.substring(5, 10), false) != 0) {
-                    
-                    newInstruction.setDestinationOperand(getRegisterOperand(instruction.substring(5, 10)));
-                } else { 
-                    
-                    newInstruction.setDestinationOperand(getImmediateOperand(instruction.substring(10, 32)));
-                }
-                break;
-            }
-
-            case end:
-                break;
-
-            default:
-                Misc.printErrorAndExit("Unknown Instruction!!");
+        } else {
+            Misc.printErrorAndExit("Unknown Instruction!!");
         }
 
-        return newInstruction;
-    }
+
+            return newInstruction;
+}
 
     
     private String addPaddingToStart(String str, int totalLength) {

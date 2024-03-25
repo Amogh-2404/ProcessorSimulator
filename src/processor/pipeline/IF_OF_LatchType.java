@@ -1,9 +1,10 @@
 package processor.pipeline;
 
 public class IF_OF_LatchType {
-
+	int currentPC;
 	boolean OF_stage_enable, isNopInstruction, isStall, isOFStageBusy, isValidInstruction;; ;
-	int instruction, currentPC;
+	Integer instruction = 0;
+
 
 
 	public void setCurrentPC(int pc) {

@@ -20,6 +20,7 @@ public class MA_RW_LatchType {
 
 	public void setInstruction(Instruction newInst) {
 		instruction = newInst;
+		setEnableAdditionalNop(false);
 	}
 
 	public MA_RW_LatchType() {
@@ -35,7 +36,14 @@ public class MA_RW_LatchType {
 		return loadResult;
 	}
 
+	public boolean getEnableAdditionalNop() {
+		return enableAdditionalNop;
+	}
 
+	public void setEnableAdditionalNop(boolean bool) {
+		enableAdditionalNop = getEnableAdditionalNop();
+		this.enableAdditionalNop = bool;
+	}
 
 
 	public boolean isValidInstruction() {

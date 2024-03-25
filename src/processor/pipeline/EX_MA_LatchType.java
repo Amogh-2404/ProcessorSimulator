@@ -4,11 +4,11 @@ import generic.Instruction;
 
 public class EX_MA_LatchType {
 
-	Boolean MA_enable;
+	Boolean MA_enable = false;
 	Instruction instruction;
 
 
-	Boolean isMABusy, isValidInst;
+	Boolean isMABusy = false, isValidInst = false;
 	public Boolean isMAstageEnabled() {
 		return MA_enable;
 	}
@@ -17,7 +17,7 @@ public class EX_MA_LatchType {
 		MA_enable = bool;
 	}
 
-	Integer aluResult, excess, op;
+	Integer aluResult = 0, excess =0, op =0;
 	public Instruction getInstruction() {
 		return instruction;
 	}
@@ -33,11 +33,11 @@ public class EX_MA_LatchType {
 		this.instruction = instruction;
 	}
 
-	public int getAluRes() {
+	public int getalures() {
 		return aluResult;
 	}
 
-	public void setAluRes(Integer result) {
+	public void setalures(Integer result) {
 		aluResult = result;
 	}
 
@@ -49,17 +49,18 @@ public class EX_MA_LatchType {
 		excess = value;
 	}
 
-	public Integer getOperand() {
-		return op;
-	}
-
 	public void setOperand(Integer operand) {
 		op = operand;
 	}
 
-	public Boolean isMAStageBusy() {
+	public boolean isMAStageBusy() {
 		return isMABusy;
 	}
+
+	public int getOperand() {
+		return op;
+	}
+
 
 	public void setMAStageBusy(Boolean isMABusy) {
 		this.isMABusy = isMABusy;

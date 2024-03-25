@@ -18,10 +18,16 @@ public class Execute implements Element {
 	EX_MA_LatchType EX_MA_Latch;
 	EX_IF_LatchType EX_IF_Latch;
 
+	IF_EnableLatchType IF_EnableLatch;
+
+	IF_OF_LatchType IF_OF_Latch;
+
 	
-	int aluResult, excess, op;
-	Boolean isBranchTaken;
-	int branchPC;
+	Integer aluResult = 0;
+	int excess = 0;
+	int op = 0;
+	Integer branchPC = 0;
+	Boolean isBranchTaken = false;
 
 	public Execute(Processor containingProcessor, OF_EX_LatchType OF_EX_Latch,
 			EX_MA_LatchType EX_MA_Latch, EX_IF_LatchType EX_IF_Latch) {
@@ -121,180 +127,87 @@ public class Execute implements Element {
 		long operand1 = OF_EX_Latch.getOperand1();
 
 
-		switch (instruction.getOperationType()) {
+		Instruction.OperationType operationType = instruction.getOperationType();
 
-			case sub:
-			case subi: {
-				this.aluResult = getSolutionAdjusted(operand1 - second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case mul:
-			case muli: {
-				this.aluResult = getSolutionAdjusted(operand1 * second);
-				this.isBranchTaken = false;
-				break;
-			}
-			case add:
-			case addi: {
-				this.aluResult = getSolutionAdjusted(operand1 + second);
-				this.isBranchTaken = false;
-				break;
-			}
-			case or:
-			case ori: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 | second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case xor:
-			case xori: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 ^ second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case div:
-			case divi: {
-
-				this.aluResult = getSolutionAdjusted(operand1 / second);
-				this.excess = (int) (operand1 % second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case slt:
-			case slti: {
-
-
-				this.aluResult = (operand1 < second) ? 1 : 0;
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case sll:
-			case slli: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 << second);
-				this.isBranchTaken = false;
-				break;
-			}
-			case sra:
-			case srai: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 >> second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case load: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 + immediate);
-				this.isBranchTaken = false;
-				break;
-			}
-
-			case bne: {
-				if (operand1 != operand2) {
-
-					this.isBranchTaken = true;
-					this.branchPC = OF_EX_Latch.getBranchTarget();
-				} else {
-
-					this.isBranchTaken = false;
-				}
-				break;
-			}
-
-			case and:
-			case andi: {
-
-				this.aluResult = getSolutionAdjusted(operand1 & second);
-				this.isBranchTaken = false;
-				break;
-			}
-			case beq: {
-				if (operand1 == operand2) {
-					this.isBranchTaken = true;
-					this.branchPC = OF_EX_Latch.getBranchTarget();
-				} else {
-
-					this.isBranchTaken = false;
-				}
-				break;
-			}
-
-
-
-			case srl:
-			case srli: {
-
-
-				this.aluResult = getSolutionAdjusted(operand1 >>> second);
-				this.isBranchTaken = false;
-				break;
-			}
-
-
-
-			case store: {
-				this.aluResult = getSolutionAdjusted(operand2 + immediate);
-				this.op = (int) operand1;
-				this.isBranchTaken = false;
-				break;
-			}
-
-
-
-			case blt: {
-				if (operand1 < operand2) {
-
-					this.isBranchTaken = true;
-					this.branchPC = OF_EX_Latch.getBranchTarget();
-				} else {
-
-					this.isBranchTaken = false;
-				}
-				break;
-			}
-
-			case bgt: {
-				if (operand1 > operand2) {
-					this.isBranchTaken = true;
-					this.branchPC = OF_EX_Latch.getBranchTarget();
-				} else {
-
-					this.isBranchTaken = false;
-				}
-				break;
-			}
-
-			case jmp: {
-				EX_IF_Latch.setIsBranchTaken(true);
-				EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+		if (operationType == Instruction.OperationType.sub || operationType == Instruction.OperationType.subi) {
+			this.aluResult = getSolutionAdjusted(operand1 - second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.mul || operationType == Instruction.OperationType.muli) {
+			this.aluResult = getSolutionAdjusted(operand1 * second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.add || operationType == Instruction.OperationType.addi) {
+			this.aluResult = getSolutionAdjusted(operand1 + second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.or || operationType == Instruction.OperationType.ori) {
+			this.aluResult = getSolutionAdjusted(operand1 | second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.xor || operationType == Instruction.OperationType.xori) {
+			this.aluResult = getSolutionAdjusted(operand1 ^ second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.div || operationType == Instruction.OperationType.divi) {
+			this.aluResult = getSolutionAdjusted(operand1 / second);
+			this.excess = (int) (operand1 % second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.slt || operationType == Instruction.OperationType.slti) {
+			this.aluResult = (operand1 < second) ? 1 : 0;
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.sll || operationType == Instruction.OperationType.slli) {
+			this.aluResult = getSolutionAdjusted(operand1 << second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.sra || operationType == Instruction.OperationType.srai) {
+			this.aluResult = getSolutionAdjusted(operand1 >> second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.load) {
+			this.aluResult = getSolutionAdjusted(operand1 + immediate);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.bne) {
+			if (operand1 != operand2) {
 				this.isBranchTaken = true;
 				this.branchPC = OF_EX_Latch.getBranchTarget();
-				break;
-			}
-
-
-			case end: {
-				EX_IF_Latch.setIsBranchTaken(false);
+			} else {
 				this.isBranchTaken = false;
-				break;
 			}
-
-			default:
-				Misc.printErrorAndExit("Instruction not supported in Execute Stage");
+		} else if (operationType == Instruction.OperationType.and || operationType == Instruction.OperationType.andi) {
+			this.aluResult = getSolutionAdjusted(operand1 & second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.beq) {
+			if (operand1 == operand2) {
+				this.isBranchTaken = true;
+				this.branchPC = OF_EX_Latch.getBranchTarget();
+			} else {
+				this.isBranchTaken = false;
+			}
+		} else if (operationType == Instruction.OperationType.srl || operationType == Instruction.OperationType.srli) {
+			this.aluResult = getSolutionAdjusted(operand1 >>> second);
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.store) {
+			this.aluResult = getSolutionAdjusted(operand2 + immediate);
+			this.op = (int) operand1;
+			this.isBranchTaken = false;
+		} else if (operationType == Instruction.OperationType.blt) {
+			if (operand1 < operand2) {
+				this.isBranchTaken = true;
+				this.branchPC = OF_EX_Latch.getBranchTarget();
+			} else {
+				this.isBranchTaken = false;
+			}
+		} else if (operationType == Instruction.OperationType.bgt) {
+			if (operand1 > operand2) {
+				this.isBranchTaken = true;
+				this.branchPC = OF_EX_Latch.getBranchTarget();
+			} else {
+				this.isBranchTaken = false;
+			}
+		} else if (operationType == Instruction.OperationType.jmp) {
+			EX_IF_Latch.setIsBranchTaken(true);
+			EX_IF_Latch.setBranchPC(OF_EX_Latch.getBranchTarget());
+			this.isBranchTaken = true;
+			this.branchPC = OF_EX_Latch.getBranchTarget();
+		} else if (operationType == Instruction.OperationType.end) {
+			EX_IF_Latch.setIsBranchTaken(false);
+			this.isBranchTaken = false;
+		} else {
+			Misc.printErrorAndExit("Instruction not supported in Execute Stage");
 		}
 
 
@@ -303,79 +216,46 @@ public class Execute implements Element {
 	
 	private void scheduleEvent(Instruction inst) {
 
-		switch (inst.getOperationType()) {
-			case mul:
-			case muli: {
-				
+		Instruction.OperationType operationType = inst.getOperationType();
 
-				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
-						Clock.getCurrentTime() + Configuration.multiplier_latency, this, this, inst,
-						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
-				OF_EX_Latch.setEXstageBusy(true);
-				break;
-			}
-			case div:
-			case divi: {
-				
-
-				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
-						Clock.getCurrentTime() + Configuration.divider_latency, this, this, inst,
-						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
-				OF_EX_Latch.setEXstageBusy(true);
-				break;
-			}
-
-			case add:
-			case sub:
-			case and:
-			case or:
-			case xor:
-			case slt:
-			case sll:
-			case srl:
-			case sra:
-			case addi:
-			case subi:
-			case andi:
-			case ori:
-			case xori:
-			case slti:
-			case slli:
-			case srli:
-			case srai:
-			case load:
-			case store:
-			case beq:
-			case bne:
-			case blt:
-			case bgt: {
-				
-
-				Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
-						Clock.getCurrentTime() + Configuration.ALU_latency, this, this, inst,
-						this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
-				OF_EX_Latch.setEXstageBusy(true);
-				break;
-			}
-
-			case jmp:
-			case end: {
-				
-				containingProcessor.getControlInterlockUnit().validate();
-
-				OF_EX_Latch.setEXstageBusy(false);
-				OF_EX_Latch.setValidInstruction(false);
-				OF_EX_Latch.setEXstageEnabled(false);
-
-				EX_MA_Latch.setValidInstruction(true);
-				EX_MA_Latch.setInstruction(inst);
-				EX_MA_Latch.setMAstageEnabled(true);
-				break;
-			}
-
-			default:
-				Misc.printErrorAndExit("Unknown Instruction!!");
+		if (operationType == Instruction.OperationType.mul || operationType == Instruction.OperationType.muli) {
+			Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+					Clock.getCurrentTime() + Configuration.multiplier_latency, this, this, inst,
+					this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+			OF_EX_Latch.setEXstageBusy(true);
+		} else if (operationType == Instruction.OperationType.div || operationType == Instruction.OperationType.divi) {
+			Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+					Clock.getCurrentTime() + Configuration.divider_latency, this, this, inst,
+					this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+			OF_EX_Latch.setEXstageBusy(true);
+		} else if (operationType == Instruction.OperationType.add || operationType == Instruction.OperationType.sub ||
+				operationType == Instruction.OperationType.and || operationType == Instruction.OperationType.or ||
+				operationType == Instruction.OperationType.xor || operationType == Instruction.OperationType.slt ||
+				operationType == Instruction.OperationType.sll || operationType == Instruction.OperationType.srl ||
+				operationType == Instruction.OperationType.sra || operationType == Instruction.OperationType.addi ||
+				operationType == Instruction.OperationType.subi || operationType == Instruction.OperationType.andi ||
+				operationType == Instruction.OperationType.ori || operationType == Instruction.OperationType.xori ||
+				operationType == Instruction.OperationType.slti || operationType == Instruction.OperationType.slli ||
+				operationType == Instruction.OperationType.srli || operationType == Instruction.OperationType.srai ||
+				operationType == Instruction.OperationType.load || operationType == Instruction.OperationType.store ||
+				operationType == Instruction.OperationType.beq || operationType == Instruction.OperationType.bne ||
+				operationType == Instruction.OperationType.blt || operationType == Instruction.OperationType.bgt) {
+			Simulator.getEventQueue().addEvent(new ExecutionCompleteEvent(
+					Clock.getCurrentTime() + Configuration.ALU_latency, this, this, inst,
+					this.aluResult, this.excess, this.op, this.isBranchTaken, this.branchPC));
+			OF_EX_Latch.setEXstageBusy(true);
+		} else if (operationType == Instruction.OperationType.jmp || operationType == Instruction.OperationType.end) {
+			containingProcessor.getControlInterlockUnit().validate();
+			OF_EX_Latch.setEXstageBusy(false);
+			OF_EX_Latch.setValidInstruction(false);
+			OF_EX_Latch.setEXstageEnabled(false);
+			EX_MA_Latch.setValidInstruction(true);
+			EX_MA_Latch.setInstruction(inst);
+			EX_MA_Latch.setMAstageEnabled(true);
+		} else {
+			Misc.printErrorAndExit("Unknown Instruction!!");
 		}
+
 	}
 
 	
@@ -398,7 +278,7 @@ public class Execute implements Element {
 
 			EX_MA_Latch.setMAstageEnabled(true);
 			EX_MA_Latch.setValidInstruction(true);
-			EX_MA_Latch.setAluRes(event.getAluResult());
+			EX_MA_Latch.setalures(event.getAluResult());
 			EX_MA_Latch.setExcess(event.getExcess());
 			EX_MA_Latch.setOperand(event.getOp());
 			EX_MA_Latch.setInstruction(event.getInst());

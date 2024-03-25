@@ -17,6 +17,10 @@ public class InstructionFetch implements Element {
 	Processor containingProcessor;
 	IF_OF_LatchType IF_OF_Latch;
 
+	MA_RW_LatchType MA_RW_Latch;
+
+	OF_EX_LatchType OF_EX_Latch;
+
 	boolean additionalNop = false; // To check if additional nop is required in case of control hazards
 
 	int additionalNopCounter = 0;
@@ -53,6 +57,7 @@ if (!additionalNop) {
 		IF_OF_Latch.setOF_stage_enable(true);
 	}
 }
+additionalNopCounter = 0;  //Reduntant ?
 	}
 	public InstructionFetch(Processor containingProcessor, IF_EnableLatchType IF_EnableLatch,
 							IF_OF_LatchType IF_OF_Latch, EX_IF_LatchType EX_IF_Latch) {

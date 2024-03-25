@@ -17,16 +17,17 @@ public class RegisterFile {
 		registerFile[registerNumber] = value;
 	}
 
+
+
+	public void incrementProgramCounter() {
+		this.programCounter++;
+	}
 	public int getProgramCounter() {
 		return programCounter;
 	}
 
 	public void setProgramCounter(int programCounter) {
 		this.programCounter = programCounter;
-	}
-
-	public void incrementProgramCounter() {
-		this.programCounter++;
 	}
 
 	public String getContentsAsString() {

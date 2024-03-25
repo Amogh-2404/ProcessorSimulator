@@ -51,15 +51,15 @@ public class Processor {
 		MA_RW_Latch = new MA_RW_LatchType();
 
 		IFUnit = new InstructionFetch(this, IF_EnableLatch, IF_OF_Latch, EX_IF_Latch);
-		OFUnit = new OperandFetch(this, IF_OF_Latch, OF_EX_Latch);
+		OFUnit = new OperandFetch(this, IF_OF_Latch, OF_EX_Latch,IF_EnableLatch);
 		EXUnit = new Execute(this, OF_EX_Latch, EX_MA_Latch, EX_IF_Latch);
-		MAUnit = new MemoryAccess(this, EX_MA_Latch, MA_RW_Latch);
-		RWUnit = new RegisterWrite(this, MA_RW_Latch, IF_EnableLatch);
+		MAUnit = new MemoryAccess(this, EX_MA_Latch, MA_RW_Latch,IF_EnableLatch);
+		RWUnit = new RegisterWrite(this, MA_RW_Latch, IF_EnableLatch,OF_EX_Latch);
 
 		
 		DataInterlockUnit =
 				new DataInterlock(this, IF_EnableLatch, IF_OF_Latch, EX_MA_Latch, MA_RW_Latch,OF_EX_Latch);
-		ControlInterlockUnit = new ControlInterlock(IF_OF_Latch, EX_IF_Latch);
+		ControlInterlockUnit = new ControlInterlock(IF_OF_Latch, EX_IF_Latch,OF_EX_Latch);
 	}
 
 	public void printState(int memoryStartingAddress, int memoryEndingAddress) {
@@ -96,6 +96,17 @@ public class Processor {
 	public Execute getEXUnit() {
 		return EXUnit;
 	}
+	public void setDataInterlockUnit(DataInterlock dataInterlockUnit) {
+		DataInterlockUnit = dataInterlockUnit;
+	}
+
+	public ControlInterlock getControlInterlockUnit() {
+		return ControlInterlockUnit;
+	}
+
+	public void setControlInterlockUnit(ControlInterlock controlInterlockUnit) {
+		ControlInterlockUnit = controlInterlockUnit;
+	}
 
 	public MemoryAccess getMAUnit() {
 		return MAUnit;
@@ -110,16 +121,6 @@ public class Processor {
 		return DataInterlockUnit;
 	}
 
-	public void setDataInterlockUnit(DataInterlock dataInterlockUnit) {
-		DataInterlockUnit = dataInterlockUnit;
-	}
 
-	public ControlInterlock getControlInterlockUnit() {
-		return ControlInterlockUnit;
-	}
-
-	public void setControlInterlockUnit(ControlInterlock controlInterlockUnit) {
-		ControlInterlockUnit = controlInterlockUnit;
-	}
 
 }

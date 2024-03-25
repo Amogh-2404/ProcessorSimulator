@@ -4,6 +4,7 @@ public class IF_EnableLatchType {
 
 	boolean IF_Stage_enable, isIFStall, isIFstageBusy;
 
+	Boolean additionalNop = false;
 
 	public boolean getIsIFStageStall() {
 		return this.isIFStall;
@@ -15,6 +16,13 @@ public class IF_EnableLatchType {
 
 	public boolean isIFstageBusy() {
 		return isIFstageBusy;
+	}
+
+	public boolean getAdditionalNop() {
+		return additionalNop;
+	}
+	public void setAdditionalNop(boolean bool) {
+		additionalNop = bool;
 	}
 	public IF_EnableLatchType() {
 		isIFStall = false;
